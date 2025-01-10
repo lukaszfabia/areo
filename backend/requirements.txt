@@ -1,0 +1,34 @@
+# server things 
+
+fastapi[standard]
+fastapi-jwt-auth
+fastapi-cors
+uvicorn[standard]
+fastapi-mail
+firebase-admin
+
+# mqtt communitaion 
+paho-mqtt
+asyncio-mqtt
+
+# testing 
+pytest
+pytest-asyncio
+pytest-cov # test coverage
+
+# db 
+pydantic
+SQLAlchemy
+alembic # migrate schemas to db
+psycopg2-binary # driver for postgres
+asyncpg
+
+# env vars 
+python-decouple
+
+# stats 
+pandas
+numpy
+
+# hashing 
+passlib[bcrypt]
