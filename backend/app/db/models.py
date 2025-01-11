@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -46,7 +46,7 @@ class WeatherData(Base):
     __tablename__ = "weather_data"
 
     id = Column(Integer, primary_key=True)
-    date = Column(DateTime, default=datetime.now(datetime.timezone.utc))
+    date = Column(DateTime, default=datetime.now(timezone.utc))
 
     temperature = Column(Float, nullable=False)
     humidity = Column(Float, nullable=False)
