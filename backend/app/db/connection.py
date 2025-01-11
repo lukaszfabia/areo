@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from decouple import config
+import pytest
 
 
 POSTGRES_USER = config("POSTGRES_USER")
@@ -21,7 +22,8 @@ __async_session = sessionmaker(
     expire_on_commit=False,
 )
 
-
+@pytest.fixture
 async def get_db() -> AsyncSession:
     async with __async_session() as session:
         yield session
+        await session.close()
