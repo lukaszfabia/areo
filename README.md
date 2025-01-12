@@ -1,6 +1,6 @@
 # Weather Assistant 
 In this project, we decided to create weather assistant. We will be collecting our data using Raspberry Pi sensors.
-# Raspberry Pi Components
+## Raspberry Pi Components
 We will use the following Raspberry Pi Components:
 - Attitiude sensor
 - Temperature sensor
@@ -10,7 +10,7 @@ We will use the following Raspberry Pi Components:
 - Multiple LEDs
 - Buzzer
 - and more?
-# General Information
+## General Information
 - Data will be displayed on website.
 - API  used to transefer data will be implemented using python language.
 - Users will be able to create account via email and set at what time of the day they want they data collected.
@@ -23,7 +23,7 @@ We will use the following Raspberry Pi Components:
 - Notifications about suggested activities and potential warnings about the weather via email.
 -Data stored in NoSQL Database, because there aren't many relations between data.
 - Some additional personalization options.
-# Potential Future Improvements - Extra Featues
+## Potential Future Improvements - Extra Featues
 - Smog detector
 - Simple face recognition algorithm.
 - Logging-in via Face-Id.
