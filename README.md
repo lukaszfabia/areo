@@ -23,3 +23,7 @@ We will use the following Raspberry Pi Components:
 - Notifications about suggested activities and potential warnings about the weather via email.
 -Data stored in NoSQL Database, because there aren't many relations between data.
 - Some additional personalization options.
+# Potential future improvements - extra featues
+- Smog detector
+- Simple face recognition algorithm.
+- Logging-in via Face-Id.
