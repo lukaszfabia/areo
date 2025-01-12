@@ -4,6 +4,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCloud } from "@fortawesome/free-solid-svg-icons";
 import { Divider } from "@nextui-org/divider";
 import Link from "next/link";
+import { general, Link as lnk, socials } from "@/lib/config";
+
+const Links: FC<{ collection: lnk[], title: string }> = ({ collection, title }) => {
+    return (
+        <div className="space-y-2 md:space-y-4">
+            <h1 className="font-semibold text-lg md:text-xl">{title}</h1>
+            <ul className="text-gray-400 space-y-1">
+                {collection.map((lnk: lnk, index: number) => (
+                    <li key={`${lnk.text}-${index}`}>
+                        <Link href={lnk.dest} target="_blank">{lnk.text}</Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    )
+}
 
 export const Footer: FC = () => {
     return (
@@ -21,24 +37,8 @@ export const Footer: FC = () => {
                         <FontAwesomeIcon icon={faCloud} className="w-4 h-4 md:w-5 md:h-5 ml-2" />
                     </div>
                 </div>
-
-                <div className="space-y-2 md:space-y-4">
-                    <h1 className="font-semibold text-lg md:text-xl">General</h1>
-                    <ul className="text-gray-400 space-y-1">
-                        <li>Element 1</li>
-                        <li>Element 2</li>
-                        <li>Element 3</li>
-                    </ul>
-                </div>
-
-                <div className="space-y-2 md:space-y-4">
-                    <h1 className="font-semibold text-lg md:text-xl">Follow Us</h1>
-                    <ul className="text-gray-400 space-y-1">
-                        <li>Element 1</li>
-                        <li>Element 2</li>
-                        <li>Element 3</li>
-                    </ul>
-                </div>
+                <Links title="General" collection={general} />
+                <Links title="Follow Us" collection={socials} />
             </div>
 
             <Divider className="my-4" />

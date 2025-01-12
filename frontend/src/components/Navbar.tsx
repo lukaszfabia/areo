@@ -21,8 +21,15 @@ import {
     Checkbox,
     Form,
     Input,
+    NavbarMenuToggle,
+    NavbarMenu,
+    NavbarMenuItem,
 } from "@nextui-org/react";
 import React, { FC, ReactNode, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faEnvelope, faLock, faMailBulk } from "@fortawesome/free-solid-svg-icons";
+import { menu } from "@/lib/config";
+import { Link as lnk } from "@/lib/config";
 
 export const AcmeLogo = () => {
     return (
@@ -38,33 +45,53 @@ export const AcmeLogo = () => {
 };
 
 export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     // if (isLoading) return  <Spinner color="secondary" label="Loading..." />
 
     return (
         <>
             <Navbar>
-                <NavbarBrand>
+                <NavbarBrand className="hidden sm:flex">
                     <AcmeLogo />
                     <p className="font-bold font-rubik">Areo</p>
                 </NavbarBrand>
 
                 <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Features
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem isActive>
-                        <Link aria-current="page" color="secondary" href="#">
-                            Customers
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Integrations
-                        </Link>
-                    </NavbarItem>
+                    {menu.map((item: lnk, index: number) => (
+                        <NavbarItem key={`${item.text}-${index}`}>
+                            <Link
+                                className="w-full hover:text-secondary-700"
+                                href={item.dest}
+                                color="foreground"
+                                size="lg"
+                            >
+                                {item.text}
+                            </Link>
+                        </NavbarItem>
+                    ))}
                 </NavbarContent>
+
+                {/* burger */}
+                <NavbarContent className="sm:hidden flex">
+                    <NavbarMenuToggle
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    />
+                </NavbarContent>
+
+                <NavbarMenu className="sm:hidden flex">
+                    {menu.map((item: lnk, index: number) => (
+                        <NavbarMenuItem key={`${item.text}-${index}`}>
+                            <Link
+                                className="w-full"
+                                href={item.dest}
+                                size="lg"
+                            >
+                                {item.text}
+                            </Link>
+                        </NavbarMenuItem>
+                    ))}
+                </NavbarMenu>
 
 
                 {/* logged */}
@@ -178,18 +205,23 @@ function NotAuth() {
                 <DrawerContent>
                     {(onClose) => (
                         <>
-                            <DrawerHeader className="flex flex-col gap-1">Tell Us Who are you?</DrawerHeader>
+                            <DrawerHeader className="flex flex-col gap-1 dark:text-white text-black">
+                                <h1>Tell Us Who are you?</h1>
+                                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal">If you don't have account, just fill form below.</p>
+                            </DrawerHeader>
                             <DrawerBody>
                                 <Form
                                     className="w-full justify-center items-center space-y-4"
                                     validationBehavior="native"
                                     validationErrors={errors}
                                     onReset={() => setSubmitted(null)}
+                                    autoComplete="on"
                                 // onSubmit={onSubmit}
                                 >
-                                    <div className="flex flex-col gap-4 max-w-md">
+                                    <div className="flex flex-col gap-4 w-full">
                                         <Input
                                             isRequired
+                                            isClearable
                                             errorMessage={({ validationDetails }) => {
                                                 if (validationDetails.valueMissing) {
                                                     return "Please enter your email";
@@ -201,12 +233,16 @@ function NotAuth() {
                                             label="Email"
                                             labelPlacement="outside"
                                             name="email"
-                                            placeholder="Enter your email"
+                                            placeholder="you@example.com"
                                             type="email"
+                                            startContent={
+                                                <FontAwesomeIcon icon={faEnvelope} className="text-default-400" />
+                                            }
                                         />
 
                                         <Input
                                             isRequired
+                                            isClearable
                                             errorMessage={getPasswordError(password)}
                                             isInvalid={getPasswordError(password) !== null}
                                             label="Password"
@@ -216,6 +252,9 @@ function NotAuth() {
                                             type="password"
                                             value={password}
                                             onValueChange={setPassword}
+                                            startContent={
+                                                <FontAwesomeIcon icon={faLock} className="text-default-400" />
+                                            }
                                         />
 
 
@@ -228,22 +267,29 @@ function NotAuth() {
                                             name="terms"
                                             validationBehavior="aria"
                                             value="true"
+                                            color="secondary"
                                             onValueChange={() => setErrors((prev) => ({ ...prev, terms: undefined }))}
                                         >
                                             Remember me
                                         </Checkbox>
 
                                         {/* {errors.terms && <span className="text-danger text-small">{errors.terms}</span>} */}
+
+                                        <div className="max-w-md flex gap-4 justify-end">
+                                            <Button type="reset" variant="flat" color="default" onPress={onClose}>
+                                                Close
+                                            </Button>
+                                            <Button color="secondary" type="submit" variant="shadow">
+                                                <FontAwesomeIcon icon={faArrowRight} />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </Form>
                             </DrawerBody>
                             <DrawerFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
-                                    Close
-                                </Button>
-                                <Button color="primary" onPress={onClose}>
-                                    Continue
-                                </Button>
+                                <div className="text-center text-gray-500">
+                                    By signing in, you agree to our <Link href="#">Terms of Service</Link> and <Link href="#">Privacy Policy.</Link>
+                                </div>
                             </DrawerFooter>
                         </>
                     )}
