@@ -16,21 +16,17 @@ export interface Link {
 
 
 export const menu: Link[] = [
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" }
+    { text: "Feautres", dest: "#features" },
+    { text: "Docs", dest: "#docs" },
+    { text: "About", dest: "#about" },
 
 ]
 
 
 export const socials: Link[] = [
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" }
+    { text: "github.com/areo", dest: "https://github.com/lukaszfabia/areo" },
+    { text: "Lukasz Fabia", dest: "https://lukaszfabia.vercel.app" },
+    { text: "Piotr Ryszko", dest: "https://github.com/rychu777" }
 ]
 
-export const general: Link[] = [
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" },
-    { text: "elem1", dest: "#" }
-]
+export const general: Link[] = menu

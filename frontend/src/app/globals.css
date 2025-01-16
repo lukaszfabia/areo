@@ -1,24 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Rubik:ital,wght@0,300..900;1,300..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  scroll-behavior: smooth;
+}
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: "Source Sans 3", Helvetica, sans-serif;
+}
+
+.spacer {
+  aspect-ratio: 900/201;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+
+.layer1 {
+  background-image: url('../../public/layer-top1.svg');
+}
+
+.layer2 {
+  background-image: url('../../public/layer-top2.svg');
+}
+
+
+.blob {
+  background-image: url('../../public/blob.svg');
+}
+
+
+.layer5 {
+  background-image: url('../../public/layer-top5.svg');
 }

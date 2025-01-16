@@ -24,6 +24,20 @@ export const features: Feature[] = [
         header: "Historical Data Analysis",
         desc: "Access and analyze past weather and air quality data to identify trends.",
         icon: faChartLine,
+    }, {
+        header: "Easy dashboard",
+        desc: "Manage read station from local webiste",
+        icon: faCloudSunRain,
+    },
+    {
+        header: "Log by via RFID Card",
+        desc: "Get suggestions for outdoor and indoor activities based on current weather.",
+        icon: faWalking,
+    },
+    {
+        header: "Persnonalize your data",
+        desc: "Just choose what weather data you want to focus on!",
+        icon: faChartLine,
     },
 
 ];
@@ -33,14 +47,14 @@ export const Features = () => {
     return (
         <>
             {features.map((feature: Feature, index: number) => (
-                <Card className="py-4 bg-slate-900 border border-slate-950 shadow-lg" key={`${feature.header} ${index}`}>
+                <Card className="py-4 bg-gray-100 shadow-lg" key={`${feature.header} ${index}`}>
                     <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
                         <div className="flex items-center gap-2">
-                            <div className="w-12 h-12 relative flex justify-center p-3 rounded-full items-center bg-slate-800 text-gray-300 shadow-md hover:scale-110 transition-transform duration-300">
-                                <div className="absolute inset-0 rounded-full bg-slate-700 opacity-40 blur-lg"></div>
+                            <div className="w-12 h-12 relative flex justify-center p-3 rounded-full items-center bg-slate-200 text-gray-700 hover:scale-110 transition-transform duration-300">
+                                <div className="absolute inset-0 rounded-full bg-slate-200 opacity-40 blur-lg"></div>
                                 <FontAwesomeIcon icon={feature.icon} className="text-xl z-10 text-secondary-500" />
                             </div>
-                            <h4 className="font-bold text-md">{feature.header}</h4>
+                            <h4 className="font-bold text-md text-default-300">{feature.header}</h4>
                         </div>
                         <small className="text-default-500 pt-4">{feature.desc}</small>
                     </CardHeader>
