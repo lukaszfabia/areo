@@ -1,19 +1,21 @@
+'use client';
+
 import { FC } from "react";
 import "@fortawesome/react-fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCloud } from "@fortawesome/free-solid-svg-icons";
 import { Divider } from "@nextui-org/divider";
-import Link from "next/link";
+import { Link } from "@nextui-org/react";
 import { general, Link as lnk, socials } from "@/lib/config";
 
-const Links: FC<{ collection: lnk[], title: string }> = ({ collection, title }) => {
+const Links: FC<{ collection: lnk[], title: string, mustBeExternal?: boolean }> = ({ collection, title, mustBeExternal = false }) => {
     return (
         <div className="space-y-2 md:space-y-4">
             <h1 className="font-semibold text-lg md:text-xl">{title}</h1>
             <ul className="text-gray-400 space-y-1">
                 {collection.map((lnk: lnk, index: number) => (
                     <li key={`${lnk.text}-${index}`}>
-                        <Link href={lnk.dest} target="_blank">{lnk.text}</Link>
+                        <Link href={lnk.dest} color="foreground" isExternal showAnchorIcon={mustBeExternal}>{lnk.text}</Link>
                     </li>
                 ))}
             </ul>
@@ -32,13 +34,13 @@ export const Footer: FC = () => {
                     <div className="flex items-center text-sm md:text-base">
                         <p>
                             Check and collect{" "}
-                            <span className="font-semibold">weather conditions</span>
+                            <span className="font-semibold">weather conditions</span>{" "}
+                            with <Link href="https://www.raspberrypi.com/" isExternal showAnchorIcon>RaspberryPi</Link>
                         </p>
-                        <FontAwesomeIcon icon={faCloud} className="w-4 h-4 md:w-5 md:h-5 ml-2" />
                     </div>
                 </div>
                 <Links title="General" collection={general} />
-                <Links title="Follow Us" collection={socials} />
+                <Links title="Follow Us" collection={socials} mustBeExternal />
             </div>
 
             <Divider className="my-4" />
@@ -46,14 +48,14 @@ export const Footer: FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-gray-400 text-sm md:text-base">
                 <p>&copy; 2024 Aero, Inc. All rights reserved.</p>
                 <div className="flex space-x-6">
-                    <Link href={"#"} className="hover:text-white">
+                    <Link href={"#"}>
                         Terms & Conditions
                     </Link>
-                    <Link href={"#"} className="hover:text-white">
+                    <Link href={"#"}>
                         Privacy Policy
                     </Link>
                 </div>
             </div>
-        </footer>
+        </footer >
     );
 };

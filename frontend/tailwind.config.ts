@@ -12,6 +12,7 @@ export default {
     extend: {},
     fontFamily: {
       'rubik': ["Rubik", 'serif'],
+      'playfair': ["Playfair Display", 'serif'],
     }
   },
   darkMode: "class",

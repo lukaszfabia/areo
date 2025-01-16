@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { meta } from "@/lib/config";
-import { ThemeProvider } from "@/providers/Theme";
 import { Footer } from "@/components/Footer";
 import { NextNavbar } from "@/components/Navbar";
+import { ThemeProvider } from "@/providers/Theme";
 
 export const metadata: Metadata = {
   title: meta.title,
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className="antialiased bg-slate-50 dark:bg-slate-950"
+        className="antialiased"
       >
         <ThemeProvider>
           <NextNavbar >
