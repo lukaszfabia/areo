@@ -13,8 +13,6 @@
   --foreground: #171717;
 }
 
-
-
 body {
   color: var(--foreground);
   background: var(--background);
@@ -29,7 +27,6 @@ body {
   background-size: cover;
 }
 
-
 .layer1 {
   background-image: url('../../public/layer-top1.svg');
 }
@@ -38,12 +35,22 @@ body {
   background-image: url('../../public/layer-top2.svg');
 }
 
-
 .blob {
   background-image: url('../../public/blob.svg');
 }
 
-
 .layer5 {
   background-image: url('../../public/layer-top5.svg');
+}
+
+.form-backgroud-img {
+  background-image: url('../../public/form-background.svg');
+}
+
+.form-backgroud {
+  aspect-ratio: 800/460;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }

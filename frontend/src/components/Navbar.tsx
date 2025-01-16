@@ -22,7 +22,7 @@ export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
 
     return (
         <div>
-            <Navbar isBordered={false}
+            <Navbar
                 className="fixed top-0 w-full z-50 transition-colors duration-300"
             >
 
