@@ -18,10 +18,7 @@ pytest-cov # test coverage
 
 # db 
 pydantic
-SQLAlchemy
-alembic # migrate schemas to db
-psycopg2-binary # driver for postgres
-asyncpg
+pymongo
 
 # env vars 
 python-decouple

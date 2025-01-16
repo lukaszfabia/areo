@@ -1,29 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+import motor.motor_asyncio
 from decouple import config
 import pytest
 
+MONGO_URI = config("MONGO_URI")
 
-POSTGRES_USER = config("POSTGRES_USER")
-POSTGRES_PASSWORD = config("POSTGRES_PASSWORD")
-POSTGRES_DB = config("POSTGRES_DB")
-POSTGRES_PORT = config("POSTGRES_PORT")
-POSTGRES_HOST = config("POSTGRES_HOST")
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+db = client.get_database()
 
-DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-
-# db session
-__async_session = sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
 
 @pytest.fixture
-async def get_db() -> AsyncSession:
-    async with __async_session() as session:
-        yield session
-        await session.close()
+async def get_db():
+    try:
+        yield db
+    finally:
+        pass

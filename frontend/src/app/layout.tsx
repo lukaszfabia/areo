@@ -4,6 +4,7 @@ import { meta } from "@/lib/config";
 import { Footer } from "@/components/Footer";
 import { NextNavbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/providers/Theme";
+import { AuthProvider } from "@/providers/Auth";
 
 export const metadata: Metadata = {
   title: meta.title,
@@ -22,10 +23,10 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <NextNavbar >
-            {/* <AuthProvider > */}
-            {children}
-            <Footer />
-            {/* </AuthProvider> */}
+            <AuthProvider >
+              {children}
+              <Footer />
+            </AuthProvider>
           </NextNavbar>
         </ThemeProvider>
       </body>

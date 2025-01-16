@@ -19,7 +19,7 @@ export const menu: Link[] = [
     { text: "Feautres", dest: "#features" },
     { text: "Docs", dest: "#docs" },
     { text: "About", dest: "#about" },
-
+    { text: "Login", dest: "/login" }
 ]
 
 
@@ -30,3 +30,6 @@ export const socials: Link[] = [
 ]
 
 export const general: Link[] = menu
+
+
+export const passwordRegex: RegExp = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
