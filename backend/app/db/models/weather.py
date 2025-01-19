@@ -1,9 +1,10 @@
 from pydantic import FiniteFloat
 from typing import Optional
-from model import Model
+from app.db.models.model import Model
 
 
 class Weather(Model):
+    __repr_name__ = "weather_data"
 
     temperature: Optional[FiniteFloat] = None
     humidity: Optional[FiniteFloat] = None

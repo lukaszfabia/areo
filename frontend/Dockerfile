@@ -1,9 +1,13 @@
 FROM node:22.13-slim
 
-WORKDIR /frontend
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
 
 COPY . .
 
-RUN npm i
+EXPOSE 3000
 
-RUN npm run dev
+CMD ["npm", "run", "dev"]

@@ -1,11 +1,11 @@
 # server things 
 
 fastapi[standard]
-fastapi-jwt-auth
 fastapi-cors
 uvicorn[standard]
 fastapi-mail
 firebase-admin
+pyjwt
 
 # mqtt communitaion 
 paho-mqtt
@@ -19,6 +19,7 @@ pytest-cov # test coverage
 # db 
 pydantic
 pymongo
+motor
 
 # env vars 
 python-decouple

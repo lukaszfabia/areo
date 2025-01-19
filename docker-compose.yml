@@ -7,36 +7,46 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
       - mongo_data:/data/db
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_ADMIN_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_ADMIN_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${ME_ADMIN_USERNAME}:${ME_ADMIN_PASSWORD}@mongo:27017/
-      ME_CONFIG_BASICAUTH: ${ME_BASICAUTH}
+    networks:
+      - areo_networks
 
   api:
-    build: backend/.
+    build:
+      context: ./backend
     restart: always
     ports:
       - ${API_PORT}:${API_PORT}
     environment:
-      - MONGODB_URI=mongodb://${ME_ADMIN_USERNAME}:${ME_ADMIN_PASSWORD}@mongo:27017/
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      HASH_SECRET: ${HASH_SECRET}
+      API_HOST: ${API_HOST}
+      API_PORT: ${API_PORT}
+      JWT_ALGO: ${JWT_ALGO}
     depends_on:
       - mongo
     volumes:
-      - .:/app
+      - ./backend:/app
+    networks:
+      - areo_networks
   app:
-    build: frontend/.
+    build:
+      context: ./frontend
     restart: always
     ports:
       - ${APP_PORT}:${APP_PORT}
     depends_on:
       - api
     volumes:
-      - .:/app
+      - ./frontend:/app
+    networks:
+      - areo_networks
+
 volumes:
   mongo_data:
+
+
+networks:
+  areo_networks:
+    driver: bridge
