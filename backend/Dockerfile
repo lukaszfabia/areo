@@ -1,4 +1,4 @@
-FROM python:3.12-silm-bookworm
+FROM python:3.11-slim
 
 WORKDIR /api
 
@@ -8,4 +8,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "uvicorn", "app:main.py" ]
+ENTRYPOINT ["sh", "-c", "uvicorn app.main:app --host $API_HOST --port $API_PORT"]
+
