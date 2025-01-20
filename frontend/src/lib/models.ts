@@ -1,23 +1,23 @@
 import { ObjectId } from "mongodb"
 
 interface Base {
-    _id?: ObjectId
-    createdAt: Date
-    updatedAt: Date
-    deletedAt?: Date | null
-
+    _id?: ObjectId | string
+    created_at: Date | string
+    updated_at: Date | string
+    deleted_at?: Date | null | string
 }
 
 interface Settings {
-    deviceToken: string
+    device_token: string
     notifications?: boolean | null
-    notifyByEmail?: boolean | null
+    notify_by_email?: boolean | null
 }
 
 export interface User extends Base {
     username?: string | null
     email: string
-    settings: Settings
+    password: string
+    settings?: Settings | null
 }
 
 export interface Weather extends Base {
@@ -30,7 +30,7 @@ export interface Weather extends Base {
 }
 
 export interface Tokens {
-    access: string,
-    refresh: string,
     user: User,
+    access_token: string,
+    refresh_token: string,
 }

@@ -1,13 +1,24 @@
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from app.db.models.model import Model
 import bcrypt
 
 
-class Settings:
+class Settings(BaseModel):
     device_token: str
     notifications: Optional[bool] = False
     notify_by_email: Optional[bool] = False
+
+    @classmethod
+    def json_schema(cls, **kwargs):
+        return {
+            "type": "object",
+            "properties": {
+                "device_token": {"type": "string"},
+                "notifications": {"type": "bool", "nullable": True, "default": False},
+                "notify_by_email": {"type": "bool", "nullable": True, "default": False},
+            },
+        }
 
 
 class User(Model):
