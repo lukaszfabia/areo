@@ -15,11 +15,18 @@ export interface Link {
 }
 
 
-export const menu: Link[] = [
-    { text: "Feautres", dest: "#features" },
-    { text: "Docs", dest: "#docs" },
-    { text: "About", dest: "#about" },
-    { text: "Login", dest: "/login" }
+const menu: Link[] = [
+    { text: "Feautres", dest: "/#features" },
+    { text: "Docs", dest: "/#docs" },
+    { text: "About", dest: "/#about" },
+]
+
+export const notAuthMenu: Link[] = [
+    ...menu, { text: "Login", dest: "/login" }
+]
+
+export const authMenu: Link[] = [
+    ...menu, { text: "Profile", dest: "/profile" }
 ]
 
 

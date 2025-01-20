@@ -2,17 +2,24 @@
 
 import { api } from "@/lib/api";
 import { Tokens, User } from "@/lib/models"
-import { clearStorage, saveCredentials } from "@/lib/token";
+import getToken, { ACCESS, REFRESH } from "@/lib/token";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 
-interface AuthProps {
+function clearStorage() {
+    localStorage.removeItem(ACCESS);
+    localStorage.removeItem(REFRESH);
+    sessionStorage.removeItem(ACCESS);
+    sessionStorage.removeItem(REFRESH);
+}
+
+export interface AuthProps {
     email: string,
     password: string
-    rememberMe: boolean
+    remember_me: boolean
 
     // is login or sign up form 
-    onCreate: boolean
+    on_create: boolean
 }
 
 type AuthCtxProps = {
@@ -46,24 +53,37 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null | undefined>(null);
 
-    useEffect(() => { !user && refresh() }, [])
+    useEffect(() => {
+        if (!user && getToken(ACCESS)) {
+            refresh();
+        }
+    }, [user])
 
-    // Get or Create user 
     const auth = useCallback(async (data: AuthProps) => {
         setIsLoading(true);
 
         try {
             const result = await api<Tokens>({
                 method: "POST",
-                endpoint: "/api/user/",
+                endpoint: "/sign-in/",
                 body: data,
             })
 
-            if (result.status === "success" && result.data) {
+            if (result.data) {
                 setUser(result.data.user)
-                saveCredentials(data.rememberMe, result.data)
-            } else {
-                setError(result.error)
+
+                console.log(result.data.user)
+
+                // save tokens 
+                const storage = data.remember_me ? localStorage : sessionStorage;
+                clearStorage();
+
+                storage.setItem(ACCESS, result.data.access_token)
+                storage.setItem(REFRESH, result.data.refresh_token)
+
+            } else if (result.detail) {
+                console.log("error: ", result.detail)
+                setError(result.detail)
             }
 
 
@@ -77,25 +97,26 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
     const logout = useCallback(() => {
         setIsLoading(true);
-        clearStorage();
         setUser(null);
+        clearStorage();
         setIsLoading(false);
     }, []);
 
 
-    // Uses token to identify user on a server 
     const refresh = useCallback(async () => {
         setIsLoading(true);
 
         try {
             const result = await api<User>({
-                endpoint: "/api/user/",
+                endpoint: "/user/me/",
             })
 
-            if (result.status === "success" && result.data) {
+            if (result.data) {
                 setUser(result.data)
+            } else if (result.detail) {
+                setError(result.detail)
             } else {
-                setError(result.error)
+                setError("Unknown error")
             }
 
 

@@ -34,6 +34,10 @@ services:
     build:
       context: ./frontend
     restart: always
+    environment:
+      API_PORT: ${API_PORT}
+      API_HOST: ${API_HOST}
+      APP_HOST: ${APP_HOST}
     ports:
       - ${APP_PORT}:${APP_PORT}
     depends_on:

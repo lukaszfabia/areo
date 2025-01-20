@@ -1,13 +1,16 @@
 import { Tokens, User, Weather } from "./models"
-import { ACCESS_TOKEN } from "./token"
+import getToken, { ACCESS } from "./token"
+
+type FailedRequest = {
+    detail: string
+}
 
 // DTO
-type Model = string | User | Weather | Tokens
+type Model = User | Weather | Tokens
 
 export interface Response<T extends Model> {
-    status: "success" | "failed"
     data?: T | null
-    error?: string | null
+    detail?: string | null
 }
 
 
@@ -15,7 +18,9 @@ export interface Response<T extends Model> {
 export interface Fetchable {
     method?: "POST" | "DELETE" | "GET" | "UPDATE"
 
-    // form: {host}:{port} e.g endpoint /api/user/1
+    apiVersion?: "/api/v1" | "/api/v2"
+
+    // provide endpoint like /sign-in/
     endpoint: string
 
     token?: string | null;
@@ -25,13 +30,15 @@ export interface Fetchable {
     body?: any | null;
 }
 
-const host: string = process.env.HOST ?? `http://localhost:${process.env.APP_PORT}`
+// const host: string = `http://${process.env.API_HOST}:${process.env.API_PORT}`
+const host: string = "http://0.0.0.0:8000"
 
 
 export const api = async <T extends Model>({
     method = "GET",
+    apiVersion = "/api/v1",
     endpoint,
-    token = ACCESS_TOKEN,
+    token = getToken(ACCESS),
     headers = {
         "content-type": "application/json;charset=UTF-8",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -39,7 +46,7 @@ export const api = async <T extends Model>({
     body,
 }: Fetchable): Promise<Response<T>> => {
     try {
-        const url = `${host}${endpoint}`;
+        const url = `${host}${apiVersion}${endpoint}`;
 
         const response = await fetch(url, {
             method,
@@ -47,21 +54,25 @@ export const api = async <T extends Model>({
             body: body ? JSON.stringify(body) : undefined,
         });
 
-        const json: Response<T> = await response.json();
 
-        if (!response.ok) {
-            return {
-                error: json.error,
-                status: "failed",
+        if (response.ok) {
+            const data: T = await response.json()
+            const result: Response<T> = {
+                data: data
             }
+            return result
         }
 
-        return json;
+        const data: FailedRequest = await response.json()
+        const result: Response<T> = {
+            detail: data.detail
+        }
+        return result
+
     } catch (err) {
         console.log("API error: ", err)
         return {
-            error: "Something went wrong!",
-            status: "failed",
+            detail: "Something went wrong!",
         }
     }
 } 

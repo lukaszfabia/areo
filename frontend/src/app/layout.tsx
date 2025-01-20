@@ -17,17 +17,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body
         className="antialiased"
       >
         <ThemeProvider>
-          <NextNavbar >
-            <AuthProvider >
+          <AuthProvider >
+            <NextNavbar>
               {children}
               <Footer />
-            </AuthProvider>
-          </NextNavbar>
+            </NextNavbar>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

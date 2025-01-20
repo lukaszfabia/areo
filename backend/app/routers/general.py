@@ -1,5 +1,5 @@
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Body, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from app.db.crud import DB
@@ -16,6 +16,14 @@ class AuthModel(BaseModel):
     password: str
     remember_me: Optional[bool] = None
     on_create: Optional[bool] = False
+
+    @staticmethod
+    def example():
+        return {
+            "email": "joe.doe@example.com",
+            "password": "P@ssw0rd",
+            "on_create": True,
+        }
 
 
 class AuthResponse(BaseModel):
@@ -36,7 +44,10 @@ def get_database() -> DB:
     response_model=AuthResponse,
     status_code=status.HTTP_200_OK,
 )
-async def sign_in(user: AuthModel, db: DB = Depends(get_database)):
+async def sign_in(
+    user: AuthModel = Body(..., example=AuthModel.example()),
+    db: DB = Depends(get_database),
+):
     db_user = await db.filter(model=User, limit=1, email=user.email)
     if len(db_user) == 0:
         raise HTTPException(
@@ -63,7 +74,10 @@ async def sign_in(user: AuthModel, db: DB = Depends(get_database)):
     response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def sign_up(user: AuthModel, db: DB = Depends(get_database)):
+async def sign_up(
+    user: AuthModel = Body(..., example=AuthModel.example()),
+    db: DB = Depends(get_database),
+):
     if not user.on_create:
         raise HTTPException(
             status_code=status.HTTP_405_METHOD_NOT_ALLOWED,

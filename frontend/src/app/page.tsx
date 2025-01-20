@@ -1,12 +1,21 @@
 "use client";
 
 import { Features } from "@/components/Features";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import Loading from "@/components/ui/Spinner";
+import { useAuth } from "@/providers/Auth";
+import { faArrowRight, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Snippet } from "@nextui-org/react";
 import { Image } from "@nextui-org/react";
+import Link from "next/link";
 
 export default function Home() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return <Loading />
+
+  const getStartedPrompt = user ? "Go to Profile" : "Get Started"
+
   return (
     <main className="text-white">
       <section className="min-h-screen flex flex-col items-center justify-center text-center py-10 bg-gradient-to-b from-cyan-500 to-blue-900 relative">
@@ -33,8 +42,10 @@ export default function Home() {
               className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg"
               radius="full"
               size="lg"
+              as={Link}
+              href={user ? "/profile" : "/login"}
             >
-              Get Started
+              {getStartedPrompt}
               <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 md:w-5 md:h-5 ml-2" />
             </Button>
           </div>
@@ -53,7 +64,7 @@ export default function Home() {
 
       <div className="layer1 spacer"></div>
 
-      <section className="pb-20 px-4" id="features">
+      <section className="pb-20 px-4 bg-white" id="features">
         <h2 className="lg:text-7xl md:text-5xl text-3xl font-bold text-center mb-10 text-black">
           Our <span className="text-blue-900">Features</span>
         </h2>
@@ -69,16 +80,16 @@ export default function Home() {
           <h2 className="md:text-5xl text-3xl font-bold mb-4 text-green-400">
             Join to<span className="font-extrabold text-gray-100 font-playfair"> Aero</span> today!
           </h2>
-          <p className="text-gray-400 mb-6">
-            Sign up and get started!
-          </p>
+          {user ? <div className="font-playfair text-gray-200">Thank you for choosing our product <FontAwesomeIcon icon={faHeart} className="text-pink-400" /> </div> : <>Sign up and get started!</>}
           <Button
             variant="ghost"
             radius="full"
             color="success"
             size="lg"
+            as={Link}
+            href={user ? "/profile" : "/login"}
           >
-            Get Started
+            {getStartedPrompt}
             <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 md:w-5 md:h-5 ml-2" />
           </Button>
         </section>

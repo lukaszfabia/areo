@@ -29,7 +29,7 @@ class AuthJWT:
         )
 
     @staticmethod
-    def verify_access_token(token: str):
+    def __verify_access_token(token: str):
         try:
             payload = jwt.decode(
                 token,
@@ -42,5 +42,6 @@ class AuthJWT:
         except jwt.JWTError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    def get_current_user(AuthJWT, token: str = Depends(oauth2_scheme)):
-        return AuthJWT.verify_access_token(token)
+    @staticmethod
+    def get_current_user(token: str = Depends(oauth2_scheme)):
+        return AuthJWT.__verify_access_token(token)

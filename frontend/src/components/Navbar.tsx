@@ -10,34 +10,44 @@ import {
     NavbarMenu,
     NavbarMenuItem,
 } from "@nextui-org/react";
-import React, { FC, ReactNode, useState } from "react";
-import { menu } from "@/lib/config";
+import React, { FC, ReactNode, useEffect, useState } from "react";
+import { authMenu, notAuthMenu } from "@/lib/config";
 import { Link as lnk } from "@/lib/config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "@/providers/Auth";
+import { usePathname } from "next/navigation";
+
+// function isActive(path: string, dest: string): boolean {
+//     const res = path.split("/").pop()?.replaceAll("#", "")
+//     return res == dest.toLowerCase()
+// }
 
 export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user, isLoading } = useAuth();
+    const [isMounted, setIsMounted] = useState(false);
+    // const path = usePathname();
 
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (isLoading || !isMounted) return null;
+
+    const menuItems = user ? authMenu : notAuthMenu
 
     return (
         <div>
-            <Navbar
-                className="fixed top-0 w-full z-50 transition-colors duration-300"
-            >
-
-                <NavbarBrand>
-                    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-white font-bold">Areo</button>
+            <Navbar className="fixed top-0 w-full z-50 transition-colors duration-300">
+                <NavbarBrand className="text-white font-extrabold text-3xl" as={Link} href="/">
+                    Areo
                 </NavbarBrand>
 
                 <NavbarContent className="hidden sm:flex gap-4">
-                    {menu.map((item: lnk, index: number) => (
-                        <NavbarItem key={`${item.text}- ${index}`}>
-                            <Link
-                                className="w-full text-gray-300"
-                                href={item.dest}
-                                size="lg"
-                            >
+                    {menuItems.map((item: lnk, index: number) => (
+                        <NavbarItem key={`${item.text}- ${index}`} >
+                            <Link className="w-full text-gray-300" href={item.dest}>
                                 {item.text}
                             </Link>
                         </NavbarItem>
@@ -52,14 +62,10 @@ export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
                     />
                 </NavbarContent>
 
-                <NavbarMenu className="sm:hidden flex">
-                    {menu.map((item: lnk, index: number) => (
+                <NavbarMenu className={`sm:hidden ${isMenuOpen ? 'flex' : 'hidden'} flex-col`}>
+                    {menuItems.map((item: lnk, index: number) => (
                         <NavbarMenuItem key={`${item.text}- ${index}`}>
-                            <Link
-                                className="w-full text-gray-300"
-                                href={item.dest}
-                                size="lg"
-                            >
+                            <Link className="w-full text-gray-300" href={item.dest}>
                                 {item.text}
                             </Link>
                         </NavbarMenuItem>
@@ -67,6 +73,6 @@ export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
                 </NavbarMenu>
             </Navbar>
             {children}
-        </div >
+        </div>
     );
 };

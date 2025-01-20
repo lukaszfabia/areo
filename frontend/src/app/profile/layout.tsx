@@ -1,9 +1,8 @@
 "use client";
-
 import Loading from "@/components/ui/Spinner";
 import { ReactNode, useEffect, useState } from "react";
 
-export default function LoginLayout({ children }: { children: ReactNode }) {
+export default function ProfileLayout({ children }: { children: ReactNode }) {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => { setIsMounted(true) }, [])

@@ -1,9 +1,7 @@
 'use client';
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import "@fortawesome/react-fontawesome";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCloud } from "@fortawesome/free-solid-svg-icons";
 import { Divider } from "@nextui-org/divider";
 import { Link } from "@nextui-org/react";
 import { general, Link as lnk, socials } from "@/lib/config";
@@ -15,7 +13,7 @@ const Links: FC<{ collection: lnk[], title: string, mustBeExternal?: boolean }> 
             <ul className="text-gray-400 space-y-1">
                 {collection.map((lnk: lnk, index: number) => (
                     <li key={`${lnk.text}-${index}`}>
-                        <Link href={lnk.dest} color="foreground" isExternal showAnchorIcon={mustBeExternal}>{lnk.text}</Link>
+                        <Link href={lnk.dest} color="foreground" showAnchorIcon={mustBeExternal}>{lnk.text}</Link>
                     </li>
                 ))}
             </ul>
@@ -24,6 +22,13 @@ const Links: FC<{ collection: lnk[], title: string, mustBeExternal?: boolean }> 
 }
 
 export const Footer: FC = () => {
+    const [isMounted, setIsMounted] = useState(false);
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return null;
+
     return (
         <footer className="p-6 md:p-12 bg-slate-950 text-white">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 space-y-6 md:space-y-0">
