@@ -1,7 +1,7 @@
 import { passwordRegex } from "@/lib/config";
 import { faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 
 import { useState } from "react";
 

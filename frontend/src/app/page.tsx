@@ -5,8 +5,8 @@ import Loading from "@/components/ui/Spinner";
 import { useAuth } from "@/providers/Auth";
 import { faArrowRight, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Snippet } from "@nextui-org/react";
-import { Image } from "@nextui-org/react";
+import { Button, Snippet, Image } from "@heroui/react";
+
 import Link from "next/link";
 
 export default function Home() {
@@ -80,7 +80,7 @@ export default function Home() {
           <h2 className="md:text-5xl text-3xl font-bold mb-4 text-green-400">
             Join to<span className="font-extrabold text-gray-100 font-playfair"> Aero</span> today!
           </h2>
-          {user ? <div className="font-playfair text-gray-200">Thank you for choosing our product <FontAwesomeIcon icon={faHeart} className="text-pink-400" /> </div> : <>Sign up and get started!</>}
+          {user ? <div className="font-playfair text-gray-200 pb-4">Thank you for choosing our product <FontAwesomeIcon icon={faHeart} className="text-pink-400" /> </div> : <>Sign up and get started!</>}
           <Button
             variant="ghost"
             radius="full"

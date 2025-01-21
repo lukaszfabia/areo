@@ -9,25 +9,20 @@ import {
     NavbarMenuToggle,
     NavbarMenu,
     NavbarMenuItem,
-} from "@nextui-org/react";
+    Button,
+} from "@heroui/react";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { authMenu, notAuthMenu } from "@/lib/config";
 import { Link as lnk } from "@/lib/config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "@/providers/Auth";
-import { usePathname } from "next/navigation";
 
-// function isActive(path: string, dest: string): boolean {
-//     const res = path.split("/").pop()?.replaceAll("#", "")
-//     return res == dest.toLowerCase()
-// }
 
 export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, logout } = useAuth();
     const [isMounted, setIsMounted] = useState(false);
-    // const path = usePathname();
 
     useEffect(() => {
         setIsMounted(true);
@@ -40,14 +35,15 @@ export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
     return (
         <div>
             <Navbar className="fixed top-0 w-full z-50 transition-colors duration-300">
-                <NavbarBrand className="text-white font-extrabold text-3xl" as={Link} href="/">
-                    Areo
+                <NavbarBrand>
+                    <Link href="/" className="text-white font-extrabold text-3xl w-fit">
+                        Areo</Link>
                 </NavbarBrand>
 
                 <NavbarContent className="hidden sm:flex gap-4">
                     {menuItems.map((item: lnk, index: number) => (
                         <NavbarItem key={`${item.text}- ${index}`} >
-                            <Link className="w-full text-gray-300" href={item.dest}>
+                            <Link className="w-full text-gray-300" href={item.dest} onPress={item.dest === "#" ? logout : () => { }}>
                                 {item.text}
                             </Link>
                         </NavbarItem>
@@ -65,7 +61,7 @@ export const NextNavbar: FC<{ children: ReactNode }> = ({ children }) => {
                 <NavbarMenu className={`sm:hidden ${isMenuOpen ? 'flex' : 'hidden'} flex-col`}>
                     {menuItems.map((item: lnk, index: number) => (
                         <NavbarMenuItem key={`${item.text}- ${index}`}>
-                            <Link className="w-full text-gray-300" href={item.dest}>
+                            <Link className="w-full text-gray-300" href={item.dest} onPress={item.dest === "#" ? logout : () => { }}>
                                 {item.text}
                             </Link>
                         </NavbarMenuItem>

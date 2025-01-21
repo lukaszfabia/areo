@@ -1,8 +1,6 @@
 "use client";
 import { AuthForm } from "@/components/AuthForm";
 
-
-
-export default function Login() {
-    return <AuthForm login />
+export default function SignUp() {
+    return <AuthForm />
 }

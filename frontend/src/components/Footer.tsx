@@ -2,8 +2,7 @@
 
 import { FC, useEffect, useState } from "react";
 import "@fortawesome/react-fontawesome";
-import { Divider } from "@nextui-org/divider";
-import { Link } from "@nextui-org/react";
+import { Link, Divider } from "@heroui/react";
 import { general, Link as lnk, socials } from "@/lib/config";
 
 const Links: FC<{ collection: lnk[], title: string, mustBeExternal?: boolean }> = ({ collection, title, mustBeExternal = false }) => {
