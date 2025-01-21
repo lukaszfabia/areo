@@ -26,7 +26,7 @@ export const notAuthMenu: Link[] = [
 ]
 
 export const authMenu: Link[] = [
-    ...menu, { text: "Profile", dest: "/profile" }
+    ...menu, { text: "Profile", dest: "/profile" }, { text: "Logout", dest: "#" }
 ]
 
 

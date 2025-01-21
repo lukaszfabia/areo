@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, Image } from "@nextui-org/react";
+import { Card, CardHeader, CardBody } from "@heroui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartLine, faCloudSunRain, faWalking, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 

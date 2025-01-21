@@ -1,4 +1,4 @@
-import { Checkbox, Form, FormProps } from "@nextui-org/react";
+import { Checkbox, Form, FormProps } from "@heroui/react";
 import { FC, ReactNode, RefObject } from "react";
 import Email from "./ui/Email";
 import Password from "./ui/Password";

@@ -3,6 +3,7 @@
 import { api } from "@/lib/api";
 import { Tokens, User } from "@/lib/models"
 import getToken, { ACCESS, REFRESH } from "@/lib/token";
+import { redirect } from "next/navigation";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 
@@ -65,14 +66,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         try {
             const result = await api<Tokens>({
                 method: "POST",
-                endpoint: "/sign-in/",
+                endpoint: data.on_create ? "/sign-up/" : "/sign-in/",
                 body: data,
             })
 
             if (result.data) {
                 setUser(result.data.user)
-
-                console.log(result.data.user)
 
                 // save tokens 
                 const storage = data.remember_me ? localStorage : sessionStorage;
@@ -92,6 +91,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
+
     }, []);
 
 
@@ -100,6 +100,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
         clearStorage();
         setIsLoading(false);
+        redirect("/login")
     }, []);
 
 

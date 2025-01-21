@@ -1,4 +1,5 @@
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
+
 
 export default function Email() {
     return (

@@ -2,9 +2,9 @@ import { ObjectId } from "mongodb"
 
 interface Base {
     _id?: ObjectId | string
-    created_at: Date | string
-    updated_at: Date | string
-    deleted_at?: Date | null | string
+    created_at: Date
+    updated_at: Date
+    deleted_at?: Date | null
 }
 
 interface Settings {

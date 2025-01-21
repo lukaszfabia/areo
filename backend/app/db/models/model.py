@@ -29,7 +29,7 @@ PydanticObjectId = Annotated[ObjectId, _ObjectIdPydanticAnnotation]
 
 
 class Model(BaseModel):
-    id: PydanticObjectId = Field(alias="_id")
+    id: Optional[PydanticObjectId] = Field(default_factory=ObjectId, alias="_id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
     deleted_at: Optional[datetime] = None
