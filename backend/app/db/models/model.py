@@ -42,7 +42,7 @@ class Model(BaseModel):
 
     @staticmethod
     def editable(field: str) -> bool:
-        # remove in future email and generate id during creating account
+        # immutable fields for user
         return field not in (
             "id",
             "_id",
