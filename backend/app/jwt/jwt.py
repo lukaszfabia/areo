@@ -1,3 +1,4 @@
+from bson import ObjectId
 import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException
@@ -17,15 +18,15 @@ class AuthJWT:
         return encoded_jwt
 
     @staticmethod
-    def create_access_token(sub: str):
+    def create_access_token(sub: str | ObjectId):
         return AuthJWT.__create_token(
-            sub=sub, expires_delta=settings.access_token_expiration
+            sub=str(sub), expires_delta=settings.access_token_expiration
         )
 
     @staticmethod
-    def create_refresh_token(sub: str):
+    def create_refresh_token(sub: str | ObjectId):
         return AuthJWT.__create_token(
-            sub=sub, expires_delta=settings.refresh_token_expiration
+            sub=str(sub), expires_delta=settings.refresh_token_expiration
         )
 
     @staticmethod

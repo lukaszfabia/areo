@@ -35,7 +35,7 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def create(self, model: T) -> Any:
+    async def create(self, model: T) -> Optional[T]:
         """Insert new model to db
 
         Args:

@@ -11,7 +11,8 @@ from datetime import datetime, timezone
 
 
 from app.db.crud import DB, T
-from backend.app.utils.hash import hash_password
+from app.utils.hash import hash_password
+from app.db.models.user import User
 
 
 class MongoDB(DB):
@@ -76,29 +77,32 @@ class MongoDB(DB):
 
         query = {k: v for k, v in kwargs.items()}
         query["deleted_at"] = None
+        if query["_id"]:
+            query["_id"] = ObjectId(query["_id"])
 
         documents = await collection.find(query).to_list(length=limit)
 
         return [model(**doc) for doc in documents]
 
-    async def create(self, model: T) -> Any:
+    async def create(self, model: T) -> Optional[T]:
         """Create a new document in MongoDB
 
         Args:
             model (T): Model to insert
 
         Returns:
-            Any: ID of the inserted document
+            Any: dict with new object
         """
         collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
 
-        dumped = model.model_dump(by_alias=True)
+        dumped = model.dict(by_alias=True)
 
         res = await collection.insert_one(dumped)
-        if res.inserted_id is None:
-            raise WriteError(f"Failed to insert document {dumped}")
+        if res.inserted_id:
+            new_user = await collection.find_one({"_id": res.inserted_id})
+            return new_user
 
-        return res.inserted_id
+        return None
 
     async def update(self, model: T, id: str, **kwargs) -> Optional[T]:
         """Update item in mongo db
@@ -118,7 +122,7 @@ class MongoDB(DB):
 
         fields_to_update = {k: v for k, v in kwargs.items() if model.editable(field=k)}
 
-        if p := fields_to_update["password"]:
+        if p := fields_to_update.get("password"):
             fields_to_update["password"] = hash_password(p)
 
         operation = {"$set": {"updated_at": now, **fields_to_update}}
@@ -131,7 +135,7 @@ class MongoDB(DB):
 
         return None
 
-    async def delete(self, model: T, **kwargs) -> Any:
+    async def delete(self, model: T, **kwargs) -> Optional[T]:
         """Soft delete from mongo db
 
         Args:

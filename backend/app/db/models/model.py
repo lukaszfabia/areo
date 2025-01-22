@@ -45,8 +45,8 @@ class Model(BaseModel):
         # remove in future email and generate id during creating account
         return field not in (
             "id",
+            "_id",
             "created_at",
             "updated_at",
             "deleted_at",
-            "email",
         )

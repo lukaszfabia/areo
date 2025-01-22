@@ -31,7 +31,7 @@ async def me(
     db_user = await db.filter(
         model=User,
         limit=1,
-        email=user["sub"],
+        _id=user["sub"],
     )
 
     if len(db_user) != 1:
@@ -77,7 +77,7 @@ async def delete(
 
     db_user = await me(user, db)
 
-    if deleted := await db.delete(model=User, email=db_user[0].email):
+    if deleted := await db.delete(model=User, _id=db_user.id):
         return deleted
 
     raise HTTPException(
