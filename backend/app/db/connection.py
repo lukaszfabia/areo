@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+from bson import ObjectId
 from decouple import config
 from pymongo.errors import WriteError
 from motor.motor_asyncio import (
@@ -6,8 +7,11 @@ from motor.motor_asyncio import (
     AsyncIOMotorDatabase,
     AsyncIOMotorCollection,
 )
+from datetime import datetime, timezone
+
 
 from app.db.crud import DB, T
+from backend.app.utils.hash import hash_password
 
 
 class MongoDB(DB):
@@ -71,7 +75,7 @@ class MongoDB(DB):
         collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
 
         query = {k: v for k, v in kwargs.items()}
-        query.update({"deleted_at": None})
+        query["deleted_at"] = None
 
         documents = await collection.find(query).to_list(length=limit)
 
@@ -95,3 +99,66 @@ class MongoDB(DB):
             raise WriteError(f"Failed to insert document {dumped}")
 
         return res.inserted_id
+
+    async def update(self, model: T, id: str, **kwargs) -> Optional[T]:
+        """Update item in mongo db
+
+        Args:
+            model (T): Model to edit
+
+        Returns:
+            Any: is deleted successfullly
+        """
+        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+
+        # use filters to find doc
+        query = {"deleted_at": None, "_id": ObjectId(id)}
+
+        now = datetime.now(timezone.utc)
+
+        fields_to_update = {k: v for k, v in kwargs.items() if model.editable(field=k)}
+
+        if p := fields_to_update["password"]:
+            fields_to_update["password"] = hash_password(p)
+
+        operation = {"$set": {"updated_at": now, **fields_to_update}}
+
+        result = await collection.update_one(query, operation)
+
+        if result.modified_count > 0:
+            updated_document = await collection.find_one(query)
+            return model(**updated_document)
+
+        return None
+
+    async def delete(self, model: T, **kwargs) -> Any:
+        """Soft delete from mongo db
+
+        Args:
+            model (T): Model to delete
+
+        Returns:
+            Any: is deleted successfullly
+        """
+        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+
+        # use filters
+        query = {k: v for k, v in kwargs.items()}
+        query["deleted_at"] = None
+
+        # update
+        now = datetime.now(timezone.utc)
+        operation = {"$set": {"deleted_at": now, "updated_at": now}}
+
+        result = await collection.update_one(query, operation)
+
+        if result.modified_count > 0:
+
+            query.pop("deleted_at")
+
+            updated_document = await collection.find_one(query)
+
+            if updated_document:
+                return model(**updated_document)
+
+        return None

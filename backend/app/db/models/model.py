@@ -40,5 +40,13 @@ class Model(BaseModel):
         populate_by_name = True
         json_encoders = {ObjectId: str}
 
-    def update(self):
-        self.updated_at = datetime.now(tz=timezone.utc)
+    @staticmethod
+    def editable(field: str) -> bool:
+        # remove in future email and generate id during creating account
+        return field not in (
+            "id",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+            "email",
+        )

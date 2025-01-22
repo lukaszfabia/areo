@@ -53,6 +53,7 @@ export const WeatherList = () => {
     let list = useAsyncList<Weather, string>({
         async load({ }) {
             return {
+                // load weather data with api 
                 items: [...weatherData],
             };
         },
