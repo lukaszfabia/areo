@@ -1,4 +1,3 @@
-from bson import ObjectId
 from fastapi import APIRouter, Body, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
@@ -60,8 +59,8 @@ async def sign_in(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
         )
 
-    access_token = AuthJWT.create_access_token(sub=requested_user.email)
-    refresh_token = AuthJWT.create_refresh_token(sub=requested_user.email)
+    access_token = AuthJWT.create_access_token(sub=requested_user.id)
+    refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
 
     return AuthResponse(
         user=requested_user, access_token=access_token, refresh_token=refresh_token
@@ -80,7 +79,7 @@ async def sign_up(
 ):
     if not user.on_create:
         raise HTTPException(
-            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="No 'on_create' property or check spelling!",
         )
 
@@ -91,18 +90,17 @@ async def sign_up(
         )
 
     new_user = User(email=user.email, password=hash_password(user.password))
-    access_token = AuthJWT.create_access_token(sub=new_user.email)
-    refresh_token = AuthJWT.create_refresh_token(sub=new_user.email)
+    access_token = AuthJWT.create_access_token(sub=new_user.id)
+    refresh_token = AuthJWT.create_refresh_token(sub=new_user.id)
 
-    try:
-        new_user.id = await db.create(new_user)
-    except Exception as e:
-        print(f"nie zwrocilo nowego objectid {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Something went wrong during creating new user!",
+    if new_user := await db.create(new_user):
+        return AuthResponse(
+            user=User(**new_user),
+            access_token=access_token,
+            refresh_token=refresh_token,
         )
 
-    return AuthResponse(
-        user=new_user, access_token=access_token, refresh_token=refresh_token
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Something went wrong during creating new user!",
     )

@@ -80,7 +80,13 @@ export default function Home() {
           <h2 className="md:text-5xl text-3xl font-bold mb-4 text-green-400">
             Join to<span className="font-extrabold text-gray-100 font-playfair"> Aero</span> today!
           </h2>
-          {user ? <div className="font-playfair text-gray-200 pb-4">Thank you for choosing our product <FontAwesomeIcon icon={faHeart} className="text-pink-400" /> </div> : <>Sign up and get started!</>}
+          <div className="font-playfair text-gray-200 pb-4">
+            {user ?
+              <span>Thank you for choosing our product <FontAwesomeIcon icon={faHeart} className="text-pink-400" /></span>
+              :
+              <span>Sign up and get started!</span>
+            }
+          </div>
           <Button
             variant="ghost"
             radius="full"
