@@ -5,15 +5,21 @@ import bcrypt
 
 
 class Settings(BaseModel):
-    device_token: str
-    notifications: Optional[bool] = False
-    notify_by_email: Optional[bool] = False
+    """Denormalized table with settings, optional element of the user profile"""
+
+    rfid_uid: Optional[str] = None  # card uid, must be unique
+    device_token: str  # uid of the device
+    notifications: Optional[bool] = (
+        False  # flag used to check if user wants to be notified
+    )
+    notify_by_email: Optional[bool] = False  # if user wants to be notifed by email
 
     @classmethod
     def json_schema(cls, **kwargs):
         return {
             "type": "object",
             "properties": {
+                "rfid_uid": {"type": "string"},
                 "device_token": {"type": "string"},
                 "notifications": {"type": "bool", "nullable": True, "default": False},
                 "notify_by_email": {"type": "bool", "nullable": True, "default": False},

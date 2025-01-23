@@ -1,3 +1,4 @@
+import { Time } from "@internationalized/date"
 import { ObjectId } from "mongodb"
 
 interface Base {
@@ -7,10 +8,13 @@ interface Base {
     deleted_at?: Date | null
 }
 
-interface Settings {
+export interface Settings {
+    rfid_uid?: string | null
     device_token: string
     notifications?: boolean | null
     notify_by_email?: boolean | null
+
+    times?: Time[] | null
 }
 
 export interface User extends Base {

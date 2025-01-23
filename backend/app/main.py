@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.general import router as general_router
 from app.routers.users import router as user_router
-from app.db.connection import MongoDB
+from app.db.mongo import MongoDB
 
 
 @asynccontextmanager

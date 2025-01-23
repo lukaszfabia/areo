@@ -1,7 +1,8 @@
 import { Checkbox, Form, FormProps } from "@heroui/react";
 import { FC, ReactNode, RefObject } from "react";
-import Email from "./ui/Email";
-import Password from "./ui/Password";
+
+import { Password } from "./ui/Password";
+import { Email } from "./ui/Email";
 
 export interface GenericFormProps extends FormProps {
     // for password strong check

@@ -1,7 +1,7 @@
 import { Input } from "@heroui/react";
 
 
-export default function Email() {
+export function Email() {
     return (
         <Input
             isRequired
@@ -15,4 +15,17 @@ export default function Email() {
             isClearable
         />
     )
+}
+
+
+export function EmailUpdate({ defaultValue }: { defaultValue: string }) {
+    return <Input
+        className="max-w-xs"
+        defaultValue={defaultValue}
+        label="Email"
+        type="email"
+        variant="bordered"
+        errorMessage="Please enter a valid email"
+        isClearable
+    />
 }
