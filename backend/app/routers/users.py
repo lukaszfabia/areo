@@ -9,7 +9,7 @@ from app.db.models.user import Settings, User
 from app.db.crud import DB
 from app.routers.general import get_database
 
-router = APIRouter()
+router = APIRouter(tags=["user assiciated endpoints", "user managment"])
 
 
 class UserUpdate(BaseModel):

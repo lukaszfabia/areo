@@ -1,1 +1,1 @@
-from app.db.connection import get_db
+from app.db.mongo import get_db

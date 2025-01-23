@@ -25,8 +25,8 @@ motor
 python-decouple
 
 # stats 
-pandas
-numpy
+# pandas
+# numpy
 
 # hashing 
 passlib[bcrypt]

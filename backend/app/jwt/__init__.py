@@ -1,0 +1,1 @@
+"""Middleware with jwt config"""

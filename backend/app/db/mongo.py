@@ -1,7 +1,6 @@
-from typing import Any, List, Optional
+from typing import List, Optional
 from bson import ObjectId
 from decouple import config
-from pymongo.errors import WriteError
 from motor.motor_asyncio import (
     AsyncIOMotorClient,
     AsyncIOMotorDatabase,
@@ -12,7 +11,6 @@ from datetime import datetime, timezone
 
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
-from app.db.models.user import User
 
 
 class MongoDB(DB):
@@ -77,8 +75,8 @@ class MongoDB(DB):
 
         query = {k: v for k, v in kwargs.items()}
         query["deleted_at"] = None
-        if query["_id"]:
-            query["_id"] = ObjectId(query["_id"])
+        if v := query.get("_id"):
+            query["_id"] = ObjectId(v)
 
         documents = await collection.find(query).to_list(length=limit)
 
