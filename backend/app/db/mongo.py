@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
+from app.db.models.model import Time
 
 
 class MongoDB(DB):
@@ -169,46 +170,29 @@ class MongoDB(DB):
 
         return None
 
-    async def get_pair(self, model: T, *args) -> Optional[Dict[str, Any]]:
-        """Get key and values
+    async def get_times(self, model: T, value: str) -> Optional[Dict[Time, str]]:
+        """Get sorted times to read"""
 
-        Args:
-            model (T): Table
-            args: fields, first is a key
-
-        Returns:
-            Optional[Dict[str, Any]]: result as a dict
-
-        Example:
-            {
-                "user@example.com": [
-                    time(12, 30),
-                    time(20, 30)
-                ],
-                "user1@example.com": [
-                    time(11, 30),
-                    time(21, 30)
-                ],
-            }
-
-        Usage:
-            Get all users with their read times
-        """
         collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
 
-        if not args:
-            raise ValueError("At least one field must be specified in args")
-
-        key_field = args[0]
-        fields = {field: 1 for field in args}
+        fields = {field: 1 for field in [value, "settings.times"]}
+        fields["_id"] = 0  # remove id
         query = {"deleted_at": None}
 
         cursor = collection.find(query, fields)
 
-        result = {}
+        result: Dict[Time, str] = {}
         async for document in cursor:
-            key = document.pop(key_field, None)
-            if key is not None:
-                result[key] = list(document.values())
+            if "settings" in document and "times" in document["settings"]:
+                for time in document["settings"]["times"]:
+                    time_value = Time(
+                        hour=time["hour"],
+                        minute=time["minute"],
+                        second=time["second"],
+                        millisecond=time["millisecond"],
+                    )
+
+                    if time_value not in result:
+                        result[time_value] = document[value]
 
         return result if result else None

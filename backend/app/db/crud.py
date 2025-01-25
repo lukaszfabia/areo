@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, TypeVar
-from app.db.models.model import Model
+from app.db.models.model import Model, Time
 
 T = TypeVar("T", bound=Model)
 
@@ -71,7 +71,7 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def get_pair(self, model: T, *args) -> Optional[Dict[str, Any]]:
+    async def get_times(self, model: T, value: str) -> Optional[Dict[Time, str]]:
         """Get pair key - value
 
         Args:
@@ -81,3 +81,4 @@ class DB(ABC):
         Returns:
             Optional[Dict[str, Any]]: result
         """
+        pass

@@ -69,3 +69,16 @@ class Time(BaseModel):
                 "millisecond": {"type": "integer"},
             },
         }
+
+    def __eq__(self, other):
+        if isinstance(other, Time):
+            return (
+                self.hour == other.hour
+                and self.minute == other.minute
+                and self.second == other.second
+                and self.millisecond == other.millisecond
+            )
+        return False
+
+    def __hash__(self):
+        return hash((self.hour, self.minute, self.second, self.millisecond))
