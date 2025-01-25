@@ -1,6 +1,6 @@
 from app.service.raspberrypi.serivce import RaspberryPiService
 from tests.config import *
-from app.db.models import weather
+from app.db.models.weather import Weather
 import adafruit_bme280.advanced as adafruit_bme280
 import w1thermsensor
 import neopixel
@@ -9,6 +9,7 @@ import busio
 
 HIGH_TEMPERATURE = 30.0
 LOW_TEMPERATURE = 5.0
+
 
 HIGH_ALTITUDE = 100
 LOW_ALTITUDE = 0.0
@@ -27,7 +28,7 @@ class RaspberryPiServiceImpl(RaspberryPiService):
     def __buzzer(self, state):
         GPIO.output(buzzerPin, not state)
 
-    def get_weather(self):
+    def get_weather(self, reader: str) -> Weather:
         """Get weather stats"""
 
         self.__buzzer(True)
@@ -43,7 +44,7 @@ class RaspberryPiServiceImpl(RaspberryPiService):
         self.__LedController.visualize_with_leds(temperature=temperature, altitude=altitude,
                                                  pressure=pressure, humidity=humidity)
 
-        return weather(temperature=temperature, altitude=altitude, 
+        return Weather(temperature=temperature, altitude=altitude, 
                        pressure=pressure, humidity=humidity, reader=reader)
 
 class Color:

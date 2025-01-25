@@ -50,3 +50,35 @@ class Model(BaseModel):
             "updated_at",
             "deleted_at",
         )
+
+
+class Time(BaseModel):
+    hour: int
+    minute: int
+    second: int
+    millisecond: int
+
+    @classmethod
+    def json_schema(cls, **kwargs):
+        return {
+            "type": "object",
+            "properties": {
+                "hour": {"type": "integer"},
+                "minute": {"type": "integer"},
+                "second": {"type": "integer"},
+                "millisecond": {"type": "integer"},
+            },
+        }
+
+    def __eq__(self, other):
+        if isinstance(other, Time):
+            return (
+                self.hour == other.hour
+                and self.minute == other.minute
+                and self.second == other.second
+                and self.millisecond == other.millisecond
+            )
+        return False
+
+    def __hash__(self):
+        return hash((self.hour, self.minute, self.second, self.millisecond))

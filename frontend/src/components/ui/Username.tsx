@@ -7,6 +7,8 @@ export function UsernameUpdate({ defaultValue }: { defaultValue: string }) {
         label="Username"
         type="text"
         variant="bordered"
+        name="username"
+        id="username"
         isClearable
         placeholder="Enter your new username"
     />

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from bson import ObjectId
 from decouple import config
 from motor.motor_asyncio import (
@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
+from app.db.models.model import Time
 
 
 class MongoDB(DB):
@@ -118,7 +119,11 @@ class MongoDB(DB):
 
         now = datetime.now(timezone.utc)
 
-        fields_to_update = {k: v for k, v in kwargs.items() if model.editable(field=k)}
+        fields_to_update = {
+            k: v
+            for k, v in kwargs.items()
+            if model.editable(field=k) and (v is not None or "")
+        }
 
         if p := fields_to_update.get("password"):
             fields_to_update["password"] = hash_password(p)
@@ -164,3 +169,30 @@ class MongoDB(DB):
                 return model(**updated_document)
 
         return None
+
+    async def get_times(self, model: T, value: str) -> Optional[Dict[Time, str]]:
+        """Get sorted times to read"""
+
+        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+
+        fields = {field: 1 for field in [value, "settings.times"]}
+        fields["_id"] = 0  # remove id
+        query = {"deleted_at": None}
+
+        cursor = collection.find(query, fields)
+
+        result: Dict[Time, str] = {}
+        async for document in cursor:
+            if "settings" in document and "times" in document["settings"]:
+                for time in document["settings"]["times"]:
+                    time_value = Time(
+                        hour=time["hour"],
+                        minute=time["minute"],
+                        second=time["second"],
+                        millisecond=time["millisecond"],
+                    )
+
+                    if time_value not in result:
+                        result[time_value] = document[value]
+
+        return result if result else None
