@@ -1,18 +1,21 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-from app.db.models.model import Model
+from typing import Any, List, Optional
+from app.db.models.model import Model, Time
 import bcrypt
+from datetime import time
 
 
 class Settings(BaseModel):
     """Denormalized table with settings, optional element of the user profile"""
 
     rfid_uid: Optional[str] = None  # card uid, must be unique
-    device_token: str  # uid of the device
+    device_token: Optional[str] = None  # uid of the device
     notifications: Optional[bool] = (
         False  # flag used to check if user wants to be notified
     )
     notify_by_email: Optional[bool] = False  # if user wants to be notifed by email
+
+    times: Optional[List[Time]] = []  # read times
 
     @classmethod
     def json_schema(cls, **kwargs):
@@ -23,6 +26,7 @@ class Settings(BaseModel):
                 "device_token": {"type": "string"},
                 "notifications": {"type": "bool", "nullable": True, "default": False},
                 "notify_by_email": {"type": "bool", "nullable": True, "default": False},
+                "times": {"type": "object", "nullable": True, "default": None},
             },
         }
 

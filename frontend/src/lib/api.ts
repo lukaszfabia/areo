@@ -16,7 +16,7 @@ export interface Response<T extends Model> {
 
 
 export interface Fetchable {
-    method?: "POST" | "DELETE" | "GET" | "UPDATE"
+    method?: "POST" | "DELETE" | "GET" | "PUT"
 
     apiVersion?: "/api/v1" | "/api/v2"
 
@@ -27,7 +27,7 @@ export interface Fetchable {
 
     headers?: Record<string, string>;
 
-    body?: any | null;
+    body?: Record<string, any> | null;
 }
 
 // const host: string = `http://${process.env.API_HOST}:${process.env.API_PORT}`

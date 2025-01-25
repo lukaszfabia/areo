@@ -25,6 +25,8 @@ export function EmailUpdate({ defaultValue }: { defaultValue: string }) {
         label="Email"
         type="email"
         variant="bordered"
+        id="email"
+        name="email"
         errorMessage="Please enter a valid email"
         isClearable
     />

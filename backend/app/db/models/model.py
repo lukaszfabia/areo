@@ -50,3 +50,22 @@ class Model(BaseModel):
             "updated_at",
             "deleted_at",
         )
+
+
+class Time(BaseModel):
+    hour: int
+    minute: int
+    second: int
+    millisecond: int
+
+    @classmethod
+    def json_schema(cls, **kwargs):
+        return {
+            "type": "object",
+            "properties": {
+                "hour": {"type": "integer"},
+                "minute": {"type": "integer"},
+                "second": {"type": "integer"},
+                "millisecond": {"type": "integer"},
+            },
+        }

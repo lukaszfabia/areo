@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from bson import ObjectId
 from decouple import config
 from motor.motor_asyncio import (
@@ -118,7 +118,11 @@ class MongoDB(DB):
 
         now = datetime.now(timezone.utc)
 
-        fields_to_update = {k: v for k, v in kwargs.items() if model.editable(field=k)}
+        fields_to_update = {
+            k: v
+            for k, v in kwargs.items()
+            if model.editable(field=k) and (v is not None or "")
+        }
 
         if p := fields_to_update.get("password"):
             fields_to_update["password"] = hash_password(p)
@@ -164,3 +168,47 @@ class MongoDB(DB):
                 return model(**updated_document)
 
         return None
+
+    async def get_pair(self, model: T, *args) -> Optional[Dict[str, Any]]:
+        """Get key and values
+
+        Args:
+            model (T): Table
+            args: fields, first is a key
+
+        Returns:
+            Optional[Dict[str, Any]]: result as a dict
+
+        Example:
+            {
+                "user@example.com": [
+                    time(12, 30),
+                    time(20, 30)
+                ],
+                "user1@example.com": [
+                    time(11, 30),
+                    time(21, 30)
+                ],
+            }
+
+        Usage:
+            Get all users with their read times
+        """
+        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+
+        if not args:
+            raise ValueError("At least one field must be specified in args")
+
+        key_field = args[0]
+        fields = {field: 1 for field in args}
+        query = {"deleted_at": None}
+
+        cursor = collection.find(query, fields)
+
+        result = {}
+        async for document in cursor:
+            key = document.pop(key_field, None)
+            if key is not None:
+                result[key] = list(document.values())
+
+        return result if result else None

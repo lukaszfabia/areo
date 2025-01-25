@@ -6,6 +6,7 @@ uvicorn[standard]
 fastapi-mail
 firebase-admin
 pyjwt
+apscheduler
 
 # mqtt communitaion 
 paho-mqtt

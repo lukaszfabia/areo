@@ -33,6 +33,7 @@ type AuthCtxProps = {
     logout: () => void;
     auth: (data: AuthProps) => void;
     refresh: () => void;
+    update: (body: Record<string, any>) => void;
 }
 
 const AuthCtx = createContext<AuthCtxProps>({
@@ -41,6 +42,7 @@ const AuthCtx = createContext<AuthCtxProps>({
     error: null,
     logout: () => { },
     auth: async () => { },
+    update: async () => { },
     refresh: async () => { },
 })
 
@@ -126,7 +128,32 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [])
+    }, []);
+
+    const update = useCallback((async (body: Record<string, any>) => {
+        setIsLoading(true);
+
+        try {
+            const res = await api<User>({
+                method: "PUT",
+                apiVersion: "/api/v1",
+                endpoint: "/user/me/",
+                body: body
+            });
+
+            if (res.data) {
+                setUser(res.data)
+            } else if (res.detail) {
+                setError(res.detail);
+            } else {
+                setError("Unknown error");
+            }
+        } catch (error) {
+            setError("Unknown error")
+        } finally {
+            setIsLoading(false);
+        }
+    }), []);
 
 
     return (
@@ -137,6 +164,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
             logout,
             auth,
             refresh,
+            update,
         }}>
             {children}
         </AuthCtx.Provider>
