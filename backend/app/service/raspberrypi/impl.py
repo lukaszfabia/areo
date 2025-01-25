@@ -1,7 +1,10 @@
 from app.service.raspberrypi.serivce import RaspberryPiService
-from tests.config import *
+from PIL import Image, ImageDraw, ImageFont
 from app.db.models.weather import Weather
+from tests.config import *
 import adafruit_bme280.advanced as adafruit_bme280
+import lib.oled.SSD1331 as SSD1331
+import RPi.GPIO as GPIO
 import w1thermsensor
 import neopixel
 import board
@@ -22,8 +25,9 @@ LOW_HUMIDITY = 0.0 # in %
 
 class RaspberryPiServiceImpl(RaspberryPiService): 
     def __init__(self):
-        self.__SensorHandler = SensorHandler()
         self.__LedController = LedController()
+        self.__ExerciseHandler = ExerciseHandler()
+        self.__ExerciseHandler.first_print_all()
    
     def __buzzer(self, state):
         GPIO.output(buzzerPin, not state)
@@ -33,16 +37,17 @@ class RaspberryPiServiceImpl(RaspberryPiService):
 
         self.__buzzer(True)
 
-        temperature = self.__SensorHandler.temperature
-        altitude = self.__SensorHandler.altitude
-        pressure = self.__SensorHandler.pressure
-        humidity = self.__SensorHandler.humidity
-        reader = ""
+        temperature = self.__ExerciseHandler.SensorHandler.temperature
+        altitude = self.__ExerciseHandler.SensorHandler.altitude
+        pressure = self.__ExerciseHandler.SensorHandler.pressure
+        humidity = self.__ExerciseHandler.SensorHandler.humidity
 
         self.__buzzer(False)
 
         self.__LedController.visualize_with_leds(temperature=temperature, altitude=altitude,
                                                  pressure=pressure, humidity=humidity)
+        self.__ExerciseHandler.print_all()
+        
 
         return Weather(temperature=temperature, altitude=altitude, 
                        pressure=pressure, humidity=humidity, reader=reader)
@@ -96,17 +101,6 @@ class LedController:
             self.__pixels[inx] = self.__colors[inx].color
         self.__pixels.show()
 
-    def rainbow(self):
-        self.__colors[0].color = Color.red
-        self.__colors[1].color = Color.orange
-        self.__colors[2].color = Color.yellow
-        self.__colors[3].color = Color.lime
-        self.__colors[4].color = Color.green
-        self.__colors[5].color = Color.cyan
-        self.__colors[6].color = Color.blue
-        self.__colors[7].color = Color.purple
-        self.update_all()
-
     def visualize_with_leds(self, temperature, altitude, pressure, humidity):
 
         # 2 LEDs for temperature
@@ -153,7 +147,6 @@ class LedController:
             self.__colors[6].color = Color.blue
             self.__colors[7].color = Color.blue
 
-
 class SensorHandler:
     def __init__(self):
         i2c = busio.I2C(board.SCL, board.SDA)
@@ -184,3 +177,113 @@ class SensorHandler:
     @property
     def humidity(self):
         return self.__sensor.humidity
+
+class Font:
+    ARIAL = ImageFont.truetype("fonts/arial.ttf")
+    TIMES = ImageFont.truetype("fonts/times.ttf")
+    MATORAN = ImageFont.truetype("fonts/Matoran.ttf")
+
+class OledHandler:
+    # Modes
+    RGB = "RGB"
+    RGBA = "RGBA"
+    CMYK = "CMYK"
+
+    GRAY = (40, 40, 40)
+
+    def __init__(self, background_color, background_file):
+        self.__display = SSD1331.SSD1331()
+        self.__display.Init()
+        self.__display.clear()
+        self.__background = Image.open(background_file)
+        self.__printer = ImageDraw.Draw(self.__background)
+        self.__background_color = background_color
+
+    def show(self):
+        self.__display.ShowImage(self.__background)
+
+    def clear(self):
+        self.__display.clear()
+
+    def reset(self):
+        self.__display.reset()
+
+    @property
+    def width(self):
+        return self.__display.width
+
+    @property
+    def height(self):
+        return self.__display.height
+
+    def base_print(self, xy, text, color=None, font=Font.ARIAL):
+        self.__printer.text(xy, text, fill=color, font=font)
+
+    def base_clear(self, xy):
+        self.__printer.rectangle(xy, fill=self.__background_color)
+
+class ExerciseHandler:
+    TEMPERATURE_DELTA = 0.1
+    HUMIDITY_DELTA = 0.1
+    ALTITUDE_DELTA = 0.1
+    PRESSURE_DELTA = 1
+    PIXEL_RIGHT = 30
+    MAX_RIGHT = 96
+
+    def __init__(self):
+        self.oled_handler = OledHandler(OledHandler.GRAY, "app/service/raspberrytpi/images/background.png")
+        self.sensorHandler = SensorHandler()
+        self.all_handlers = \
+            [
+                self.SensorPrintHandler(self.oled_handler, self.sensorHandler.temperature,
+                                   (self.PIXEL_RIGHT, 3),
+                                   ((self.PIXEL_RIGHT, 0), (self.MAX_RIGHT, 20)),
+                                   self.TEMPERATURE_DELTA, 'Temp:', 'C'),
+                self.SensorPrintHandler(self.oled_handler, self.sensorHandler.humidity,
+                                   (self.PIXEL_RIGHT, 19),
+                                   ((self.PIXEL_RIGHT, 15), (self.MAX_RIGHT, 35)),
+                                   self.HUMIDITY_DELTA, 'Hum:', '%'),
+                self.SensorPrintHandler(self.oled_handler, self.sensorHandler.altitude,
+                                   (self.PIXEL_RIGHT, 35),
+                                   ((self.PIXEL_RIGHT, 30), (self.MAX_RIGHT, 50)),
+                                   self.ALTITUDE_DELTA, 'Alt:', 'm'),
+                self.SensorPrintHandler(self.oled_handler, self.sensorHandler.pressure,
+                                   (self.PIXEL_RIGHT, 50),
+                                   ((self.PIXEL_RIGHT, 45), (self.MAX_RIGHT, 65)),
+                                   self.PRESSURE_DELTA, 'Press:', 'hPa')
+            ]
+
+    class SensorPrintHandler:
+        def __init__(self, oled_handler, accessor, pixel_tuple, clear_tuple, value_delta, extra_text, si_unit):
+            self.oled_handler = oled_handler
+            self.current_value = accessor()
+            self.value_delta = value_delta
+            self.accessor = accessor
+            self.print_tuple = pixel_tuple
+            self.clear_tuple_of_tuples = clear_tuple
+            self.extra_text = extra_text
+            self.si_unit = si_unit
+
+        def conditioned_print(self, font=Font.ARIAL, color=None):
+            new_value = self.accessor()
+            if abs(self.current_value - new_value) > self.value_delta:
+                self.current_value = new_value
+                self.print(font, color)
+
+        def print(self, font=Font.ARIAL, color=None):
+            self.clearer()
+            text = f'{self.extra_text} {round(self.current_value, 1)} {self.si_unit}'
+            self.oled_handler.base_print(self.print_tuple, text, color=color, font=font)
+
+        def clearer(self):
+            self.oled_handler.base_clear(self.clear_tuple_of_tuples)
+
+    def first_print_all(self):
+        for handler in self.all_handlers:
+            handler.print()
+        self.oled_handler.show()
+
+    def print_all(self):
+        for handler in self.all_handlers:
+            handler.conditioned_print()
+        self.oled_handler.show()
