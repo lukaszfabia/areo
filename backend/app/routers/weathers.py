@@ -21,6 +21,9 @@ router = APIRouter(tags=["weather associated endpoints", "weather data"])
 async def weather_historical_data(): ...
 
 
+# select * from weather where reader = user.email
+
+
 @router.get(
     "/weather/",
     tags=["current weather stats"],
@@ -29,9 +32,12 @@ async def weather_historical_data(): ...
 async def current_weather(): ...
 
 
-@router.get(
-    "/weather/notify/",
-    tags=["notify user"],
-    status_code=status.HTTP_200_OK,
-)
-async def notify(): ...
+# call to the raspberry
+
+
+# @router.get(
+#     "/weather/notify/",
+#     tags=["notify user"],
+#     status_code=status.HTTP_200_OK,
+# )
+# async def notify(): ...

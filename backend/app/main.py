@@ -10,86 +10,91 @@ from app.routers.users import router as user_router
 from app.db.mongo import MongoDB
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-
-# from app.service.raspberrypi.service import (
-#     RaspberryPiService,
-# )
+from apscheduler.triggers.interval import IntervalTrigger
+from app.service.raspberrypi.service import RaspberryPiService
 from app.service.scheduler.service import SchedulerService
 
 logger = logging.getLogger("apscheduler")
 logging.basicConfig(level=logging.INFO)
 
 
-# async def make_read(reader: str, app: FastAPI, job_id: str):
-#     logger.info(f"Executing job for {reader} with job_id: {job_id}")
-#     logger.info(f"Reading weather data for: {reader}")
-#     # call make read function from scheduler service
+async def make_read(reader: str, app: FastAPI, job_id: str):
+    logger.info(f"Executing job for {reader} with job_id: {job_id}")
+    logger.info(f"Reading weather data for: {reader}")
+    # call make read function from scheduler service
 
-#     await schedule_next_job(reader, app, job_id)
-
-
-# async def schedule_next_job(reader: str, app: FastAPI, job_id: str):
-#     logger.info(f"Scheduling next job for {reader}...")
-
-#     next_schedule_time = datetime.datetime.now()
-
-#     trigger = CronTrigger(
-#         hour=next_schedule_time.hour,
-#         minute=next_schedule_time.minute,
-#         second=next_schedule_time.second,
-#     )
-
-#     app.scheduler.remove_job(job_id)
-
-#     app.scheduler.add_job(
-#         func=make_read,
-#         args=(reader, app, job_id),
-#         trigger=trigger,
-#         id=job_id,
-#         replace_existing=True,
-#     )
-#     logger.info(
-#         f"Job {job_id} scheduled again at {next_schedule_time.hour}:{next_schedule_time.minute}"
-#     )
+    await schedule_next_job(reader, app, job_id)
 
 
-# async def refresh_schedules(app: FastAPI):
-#     logger.info("Loading schedules...")
+async def schedule_next_job(reader: str, app: FastAPI, job_id: str):
+    logger.info(f"Scheduling next job for {reader}...")
 
-#     schedules = await app.scheduler_service.get_schedules()
+    next_schedule_time = datetime.datetime.now()
 
-#     if schedules is None:
-#         logger.info("No tasks")
-#     else:
-#         logger.info(f"Fetched schedules: {schedules}")
+    trigger = CronTrigger(
+        hour=next_schedule_time.hour,
+        minute=next_schedule_time.minute,
+        second=next_schedule_time.second,
+    )
 
-#         for job in app.scheduler.get_jobs():
-#             app.scheduler.remove_job(job.id)
-#             logger.info(f"Removed job {job.id}")
+    app.scheduler.remove_job(job_id)
 
-#         for time, reader in schedules.items():
-#             try:
-#                 trigger = CronTrigger(
-#                     hour=time.hour, minute=time.minute, second=time.second
-#                 )
-#                 logger.info(
-#                     f"Adding job for {reader} at {time.hour}:{time.minute}:{time.second}"
-#                 )
+    app.scheduler.add_job(
+        func=make_read,
+        args=(reader, app, job_id),
+        trigger=trigger,
+        id=job_id,
+        replace_existing=True,
+    )
+    logger.info(
+        f"Job {job_id} scheduled again at {next_schedule_time.hour}:{next_schedule_time.minute}"
+    )
 
-#                 job_id = str(uuid.uuid4())
 
-#                 app.scheduler.add_job(
-#                     func=make_read,
-#                     args=(reader, app, job_id),
-#                     trigger=trigger,
-#                     id=job_id,
-#                     replace_existing=True,
-#                 )
-#                 logger.info(
-#                     f"Scheduled job for {reader} at {time.hour}:{time.minute}:{time.second}"
-#                 )
-#             except Exception as e:
-#                 logger.error(f"Error scheduling job for {reader}: {e}")
+async def refresh_schedules(app: FastAPI):
+    logger.info("Refreshing schedules...")
+
+    schedules = await app.scheduler_service.get_schedules()
+    if not schedules:
+        logger.info("No tasks")
+        return
+
+    current_job_ids = {
+        f"{reader}_{time.hour}_{time.minute}_{time.second}"
+        for time, reader in schedules.items()
+    }
+
+    # Remove outdated jobs
+    for job in app.scheduler.get_jobs():
+        if job.id == "refresh_schedules":
+            continue
+        if job.id not in current_job_ids:
+            app.scheduler.remove_job(job.id)
+            logger.info(f"Removed outdated job {job.id}")
+
+    # Add or update current jobs
+    for time, reader in schedules.items():
+        job_id = f"{reader}_{time.hour}_{time.minute}_{time.second}"
+        try:
+            trigger = CronTrigger(
+                hour=time.hour,
+                minute=time.minute,
+                second=time.second,
+                timezone="Europe/Warsaw",  # Set to your desired timezone
+            )
+            logger.info(f"Adding/updating job {job_id}")
+
+            app.scheduler.add_job(
+                func=make_read,
+                args=(reader, app, job_id),
+                trigger=trigger,
+                id=job_id,
+                replace_existing=True,
+            )
+            job = app.scheduler.get_job(job_id)
+            logger.info(f"Scheduled job {job_id}. Next run: {job.next_run_time}")
+        except Exception as e:
+            logger.error(f"Error scheduling job {job_id}: {e}")
 
 
 @asynccontextmanager
@@ -97,24 +102,24 @@ async def lifespan(app: FastAPI):
     app.mongo = MongoDB()
     app.database = app.mongo.db
 
-    app.scheduler = AsyncIOScheduler()
+    app.scheduler = AsyncIOScheduler(timezone="UTC")
     app.scheduler.start()
     logger.info("Scheduler started.")
 
-    # app.raspberry_pi_service = RaspberryPiService()
-    # app.scheduler_service = SchedulerService(
-    #     db=app.mongo,  # raspberry=app.raspberry_pi_service
-    # )
+    app.raspberry_pi_service = RaspberryPiService()
+    app.scheduler_service = SchedulerService(
+        db=app.mongo, raspberry=app.raspberry_pi_service
+    )
 
-    # await refresh_schedules(app)
+    await refresh_schedules(app)
 
-    # app.scheduler.add_job(
-    #     refresh_schedules,
-    #     trigger=CronTrigger(minute="*", second="0"),
-    #     args=[app],
-    #     id="refresh_schedules",
-    #     replace_existing=True,
-    # )
+    app.scheduler.add_job(
+        refresh_schedules,
+        trigger=IntervalTrigger(seconds=30),
+        args=[app],
+        id="refresh_schedules",
+        replace_existing=True,
+    )
 
     try:
         yield

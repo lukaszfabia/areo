@@ -12,6 +12,7 @@ import busio
 import adafruit_bme280
 from typing import Optional
 from card_handler import rfid_read
+from handlers import WeatherHandler
 
 terminal_id = "T0"
 broker = "10.0.0.1"
@@ -28,30 +29,7 @@ GPIO.setup(buzzerPin, GPIO.OUT)
 GPIO.setup(buttonRed, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
-class WeatherSensor:
-    def __init__(self):
-        i2c = busio.I2C(board.SCL, board.SDA)
-        self.__sensor = adafruit_bme280.Adafruit_BME280_I2C(i2c, 0x76)
-        self.__init_env()
-
-    def __init_env(self):
-        self.__sensor.sea_level_pressure = 1013.25
-        self.__sensor.standby_period = adafruit_bme280.STANDBY_TC_500
-        self.__sensor.iir_filter = adafruit_bme280.IIR_FILTER_X16
-        self.__sensor.overscan_pressure = adafruit_bme280.OVERSCAN_X16
-        self.__sensor.overscan_humidity = adafruit_bme280.OVERSCAN_X1
-        self.__sensor.overscan_temperature = adafruit_bme280.OVERSCAN_X2
-
-    def get_weather_data(self):
-        return {
-            "temperature": self.__sensor.temperature,
-            "humidity": self.__sensor.humidity,
-            "pressure": self.__sensor.pressure,
-            "altitude": self.__sensor.altitude,
-        }
-
-
-weather_handler = WeatherSensor()
+weather_handler = WeatherHandler()
 
 
 def connect_to_broker() -> None:
@@ -71,7 +49,7 @@ def call_rfid_reading(uid, num) -> None:
 
 def send_weather_data() -> None:
     try:
-        weather_data = weather_handler.get_weather_data()
+        weather_data = weather_handler.get_weather()
         weather_data["timestamp"] = datetime.datetime.now().isoformat()
         client.publish("sensors/weather", json.dumps(weather_data))
         print(f"Weather data sent: {weather_data}")

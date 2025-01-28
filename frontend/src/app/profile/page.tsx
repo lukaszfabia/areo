@@ -172,25 +172,21 @@ function Settings({ user }: { user: User }) {
                             </div>
                         </Switch>
 
-                        {enabledNotifications && (
-                            <>
-                                <p className="text-gray-300">To be notified on your phone, just click the button below.</p>
-                                <div className="flex items-center justify-between space-x-6 w-full">
-                                    <Input
-                                        isReadOnly
-                                        className="w-full"
-                                        defaultValue={user.settings?.rfid_uid ?? "XXX-XXX-XXX"}
-                                        label="Device Token"
-                                        type="text"
-                                        variant="bordered"
-                                    />
-                                    <Button variant="ghost" size="lg" onPress={addRfid}>
-                                        <span>Add rfid</span>
-                                        <FontAwesomeIcon icon={faMobile} />
-                                    </Button>
-                                </div>
-                            </>
-                        )}
+                        <p className="text-gray-300">To be notified on your phone, just click the button below.</p>
+                        <div className="flex items-center justify-between space-x-6 w-full">
+                            <Input
+                                isReadOnly
+                                className="w-full"
+                                defaultValue={user.settings?.rfid_uid ?? "XXX-XXX-XXX"}
+                                label="Device Token"
+                                type="text"
+                                variant="bordered"
+                            />
+                            <Button variant="ghost" size="lg" onPress={addRfid}>
+                                <span>Add rfid</span>
+                                <FontAwesomeIcon icon={faMobile} />
+                            </Button>
+                        </div>
                     </Form>
                 </section>
 

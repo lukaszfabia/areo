@@ -22,8 +22,8 @@ def rfid_read() -> tuple[list[int], int]:
 
 
 def health() -> None:
-    print('\nThe RFID reader test.')
-    print('Place the card close to the reader (on the right side of the set).')
+    print("\nThe RFID reader test.")
+    print("Place the card close to the reader (on the right side of the set).")
 
     try:
         rfid_read()
@@ -34,4 +34,3 @@ def health() -> None:
 
 if __name__ == "__main__":
     health()
-
