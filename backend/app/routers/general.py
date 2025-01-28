@@ -121,31 +121,33 @@ async def sign_up(
 )
 async def rfid_auth(
     db: DB = Depends(get_database),
-    raspberry: RaspberryPiService = Depends(get_raspberry()),
+    # raspberry: RaspberryPiService = Depends(get_raspberry),
 ):
 
-    result = await raspberry.send_command(
-        topic="command/rfid",
-        message={"action": "start_rfid"},
-        timeout=30,
-    )
+    # result = await raspberry.send_command(
+    #     topic="command/rfid",
+    #     message={"action": "start_rfid"},
+    #     timeout=30,
+    # )
 
-    uid = result["uid"]
+    # uid = result["uid"]
 
-    q = {"settings.rfid_uid": uid}
+    # q = {"settings.rfid_uid": uid}
 
-    db_user = await db.filter(model=User, limit=1, **q)
+    # db_user = await db.filter(model=User, limit=1, **q)
 
-    if len(db_user) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
-        )
+    # if len(db_user) == 0:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+    #     )
 
-    requested_user: User = db_user[0]
+    # requested_user: User = db_user[0]
 
-    access_token = AuthJWT.create_access_token(sub=requested_user.id)
-    refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
+    # access_token = AuthJWT.create_access_token(sub=requested_user.id)
+    # refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
 
-    return AuthResponse(
-        user=requested_user, access_token=access_token, refresh_token=refresh_token
-    )
+    # return AuthResponse(
+    #     user=requested_user, access_token=access_token, refresh_token=refresh_token
+    # )
+
+    ...

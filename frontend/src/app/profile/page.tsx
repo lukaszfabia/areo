@@ -9,7 +9,7 @@ import { WeatherList } from "@/components/WeatherList";
 import { Button, Chip, cn, Form, Input, Spinner, Switch, TimeInput } from "@heroui/react";
 import { FormEvent, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faL, faMobile, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faMobile, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { EmailUpdate } from "@/components/ui/Email";
 import { PasswordUpdate } from "@/components/ui/Password";
 import { UsernameUpdate } from "@/components/ui/Username";
@@ -56,11 +56,10 @@ export default function Profile() {
 
 // TODO: refactor
 function Settings({ user }: { user: User }) {
-    const { isLoading, update } = useAuth();
+    const { isLoading, update, addRfid } = useAuth();
     const [enabledNotifications, setEnabledNotifications] = useState(user.settings?.notifications ?? false);
     const [notifyByEmail, setNotifyByEmail] = useState(user.settings?.notify_by_email ?? false);
     // make request to firebase 
-    const [deviceToken, setDeviceToken] = useState<string>("XXX-XXX-XXX-XXX");
     const [newTime, setNewTime] = useState<Time | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -106,7 +105,6 @@ function Settings({ user }: { user: User }) {
 
         update(body)
     }
-
 
 
     return (
@@ -181,13 +179,13 @@ function Settings({ user }: { user: User }) {
                                     <Input
                                         isReadOnly
                                         className="w-full"
-                                        defaultValue={user.settings?.device_token ?? deviceToken}
+                                        defaultValue={user.settings?.rfid_uid ?? "XXX-XXX-XXX"}
                                         label="Device Token"
                                         type="text"
                                         variant="bordered"
                                     />
-                                    <Button variant="ghost" size="lg" onPress={handleToken}>
-                                        <span>Get Token</span>
+                                    <Button variant="ghost" size="lg" onPress={addRfid}>
+                                        <span>Add rfid</span>
                                         <FontAwesomeIcon icon={faMobile} />
                                     </Button>
                                 </div>
