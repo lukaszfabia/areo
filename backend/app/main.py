@@ -11,7 +11,9 @@ from app.db.mongo import MongoDB
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from app.service.raspberrypi.impl import RaspberryPiServiceImpl
+from app.service.raspberrypi.service import (
+    RaspberryPiService,
+)
 from app.service.scheduler.service import SchedulerService
 
 logger = logging.getLogger("apscheduler")
@@ -55,35 +57,39 @@ async def refresh_schedules(app: FastAPI):
     logger.info("Loading schedules...")
 
     schedules = await app.scheduler_service.get_schedules()
-    logger.info(f"Fetched schedules: {schedules}")
 
-    for job in app.scheduler.get_jobs():
-        app.scheduler.remove_job(job.id)
-        logger.info(f"Removed job {job.id}")
+    if schedules is None:
+        logger.info("No tasks")
+    else:
+        logger.info(f"Fetched schedules: {schedules}")
 
-    for time, reader in schedules.items():
-        try:
-            trigger = CronTrigger(
-                hour=time.hour, minute=time.minute, second=time.second
-            )
-            logger.info(
-                f"Adding job for {reader} at {time.hour}:{time.minute}:{time.second}"
-            )
+        for job in app.scheduler.get_jobs():
+            app.scheduler.remove_job(job.id)
+            logger.info(f"Removed job {job.id}")
 
-            job_id = str(uuid.uuid4())
+        for time, reader in schedules.items():
+            try:
+                trigger = CronTrigger(
+                    hour=time.hour, minute=time.minute, second=time.second
+                )
+                logger.info(
+                    f"Adding job for {reader} at {time.hour}:{time.minute}:{time.second}"
+                )
 
-            app.scheduler.add_job(
-                func=make_read,
-                args=(reader, app, job_id),
-                trigger=trigger,
-                id=job_id,
-                replace_existing=True,
-            )
-            logger.info(
-                f"Scheduled job for {reader} at {time.hour}:{time.minute}:{time.second}"
-            )
-        except Exception as e:
-            logger.error(f"Error scheduling job for {reader}: {e}")
+                job_id = str(uuid.uuid4())
+
+                app.scheduler.add_job(
+                    func=make_read,
+                    args=(reader, app, job_id),
+                    trigger=trigger,
+                    id=job_id,
+                    replace_existing=True,
+                )
+                logger.info(
+                    f"Scheduled job for {reader} at {time.hour}:{time.minute}:{time.second}"
+                )
+            except Exception as e:
+                logger.error(f"Error scheduling job for {reader}: {e}")
 
 
 @asynccontextmanager
@@ -95,7 +101,7 @@ async def lifespan(app: FastAPI):
     app.scheduler.start()
     logger.info("Scheduler started.")
 
-    app.raspberry_pi_service = RaspberryPiServiceImpl()
+    app.raspberry_pi_service = RaspberryPiService()
     app.scheduler_service = SchedulerService(
         db=app.mongo, raspberry=app.raspberry_pi_service
     )

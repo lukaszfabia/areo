@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 from app.db.models.model import Time
 from app.db.crud import DB
 from app.db.models.user import User
-from app.service.raspberrypi.serivce import RaspberryPiService
+from app.service.raspberrypi.service import RaspberryPiService
 
 
 class SchedulerService:

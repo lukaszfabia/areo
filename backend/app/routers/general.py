@@ -6,6 +6,7 @@ from app.jwt.jwt import AuthJWT
 from app.db.models.user import User
 from app.utils.hash import hash_password
 from fastapi import status
+from app.service.raspberrypi.service import RaspberryPiService
 
 router = APIRouter(tags=["account", "user_management"])
 
@@ -35,6 +36,12 @@ def get_database() -> DB:
     from app.main import app
 
     return app.mongo
+
+
+def get_raspberry() -> RaspberryPiService:
+    from app.main import app
+
+    return app.raspberry_pi_service
 
 
 @router.post(
@@ -103,4 +110,42 @@ async def sign_up(
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Something went wrong during creating new user!",
+    )
+
+
+@router.get(
+    "/rfid-auth",
+    tags=["auth by card"],
+    response_model=AuthResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def rfid_auth(
+    db: DB = Depends(get_database),
+    raspberry: RaspberryPiService = Depends(get_raspberry()),
+):
+
+    result = await raspberry.send_command(
+        topic="command/rfid",
+        message={"action": "start_rfid"},
+        timeout=30,
+    )
+
+    uid = result["uid"]
+
+    q = {"settings.rfid_uid": uid}
+
+    db_user = await db.filter(model=User, limit=1, **q)
+
+    if len(db_user) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+        )
+
+    requested_user: User = db_user[0]
+
+    access_token = AuthJWT.create_access_token(sub=requested_user.id)
+    refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
+
+    return AuthResponse(
+        user=requested_user, access_token=access_token, refresh_token=refresh_token
     )
