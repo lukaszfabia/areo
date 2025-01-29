@@ -89,7 +89,7 @@ class RaspberryPiService:
         try:
             await self.send_command(
                 topic="command/rfid",
-                message={"action": "stop_rifd"},
+                message={"action": "stop_rfid"},
                 timeout=10,
             )
         except TimeoutError:
