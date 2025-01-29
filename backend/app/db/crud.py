@@ -92,7 +92,7 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def dummy_weather(self, limit: Optional[int] = 20) -> bool:
+    async def dummy_weather(self, model: T, reader: str, limit: Optional[int] = 20) -> bool:
         """Generate some weather data
 
         Args:

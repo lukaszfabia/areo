@@ -4,6 +4,7 @@ from typing import Optional
 from app.db.crud import DB
 from app.jwt.jwt import AuthJWT
 from app.db.models.user import User
+from app.db.models.weather import Weather
 from app.utils.hash import hash_password
 from fastapi import status
 from app.service.raspberrypi.service import RaspberryPiService
@@ -46,8 +47,10 @@ def get_raspberry() -> RaspberryPiService:
 
 @router.get("/", tags=["db filler"], status_code=status.HTTP_201_CREATED)
 async def api_root(db: DB = Depends(get_database)):
-
-    if await db.dummy_weather():
+    reader = "rychu@rychu.com"
+    model = Weather
+    limit = 20
+    if await db.dummy_weather(model=model, reader=reader, limit=limit):
         return {
             "message": "Successfully filled!",
         }
