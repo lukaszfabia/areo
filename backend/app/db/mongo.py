@@ -61,7 +61,13 @@ class MongoDB(DB):
 
         return [model(**doc) for doc in documents]
 
-    async def filter(self, model: T, limit: Optional[int] = None, **kwargs) -> List[T]:
+    async def filter(
+        self,
+        model: T,
+        limit: Optional[int] = None,
+        skip: Optional[int] = None,
+        **kwargs,
+    ) -> List[T]:
         """Filter models based on query
 
         Args:
@@ -79,7 +85,7 @@ class MongoDB(DB):
         if v := query.get("_id"):
             query["_id"] = ObjectId(v)
 
-        documents = await collection.find(query).to_list(length=limit)
+        documents = await collection.find(query).skip(skip).to_list(length=limit)
 
         return [model(**doc) for doc in documents]
 
@@ -98,8 +104,8 @@ class MongoDB(DB):
 
         res = await collection.insert_one(dumped)
         if res.inserted_id:
-            new_user = await collection.find_one({"_id": res.inserted_id})
-            return new_user
+            new_obj = await collection.find_one({"_id": res.inserted_id})
+            return new_obj
 
         return None
 
@@ -196,3 +202,15 @@ class MongoDB(DB):
                         result[time_value] = document[value]
 
         return result if result else None
+
+    async def dummy_weather(self, limit: Optional[int] = 20) -> bool:
+        """Inserts dummy weather data
+
+        Args:
+            limit (Optional[int], optional): how many docs you want. Defaults to 20.
+
+        Returns:
+            bool: operation status
+        """
+        # TODO: implement filler
+        ...

@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import rfid
 import RPi.GPIO as GPIO
 import time
 import datetime
 import paho.mqtt.client as mqtt
 import json
-import board
-import busio
-import adafruit_bme280
 from typing import Optional
 from card_handler import rfid_read
 from handlers import WeatherHandler
@@ -51,10 +47,10 @@ def send_weather_data() -> None:
     try:
         weather_data = weather_handler.get_weather()
         weather_data["timestamp"] = datetime.datetime.now().isoformat()
-        client.publish("sensors/weather", json.dumps(weather_data))
+        client.publish("response/weather", json.dumps(weather_data))
         print(f"Weather data sent: {weather_data}")
     except Exception as e:
-        client.publish("sensors/weather", json.dumps({"error": str(e)}))
+        client.publish("response/weather", json.dumps({"error": str(e)}))
         print(f"Error reading weather data: {e}")
 
 

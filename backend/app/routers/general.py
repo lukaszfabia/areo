@@ -44,6 +44,16 @@ def get_raspberry() -> RaspberryPiService:
     return app.raspberry_pi_service
 
 
+@router.get("/", tags=["db filler"], status_code=status.HTTP_201_CREATED)
+async def api_root(db: DB = Depends(get_database)):
+
+    if await db.dummy_weather():
+        return {
+            "message": "Successfully filled!",
+        }
+    raise HTTPException(detail="Something went wrong :(")
+
+
 @router.post(
     "/sign-in/",
     tags=["account", "user_management"],
@@ -121,33 +131,37 @@ async def sign_up(
 )
 async def rfid_auth(
     db: DB = Depends(get_database),
-    # raspberry: RaspberryPiService = Depends(get_raspberry),
+    raspberry: RaspberryPiService = Depends(get_raspberry),
 ):
 
-    # result = await raspberry.send_command(
-    #     topic="command/rfid",
-    #     message={"action": "start_rfid"},
-    #     timeout=30,
-    # )
+    try:
+        result = await raspberry.send_command(
+            topic="command/rfid",
+            message={"action": "start_rfid"},
+            timeout=30,
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to connect with raspberry pi",
+        )
 
-    # uid = result["uid"]
+    uid = result["uid"]
 
-    # q = {"settings.rfid_uid": uid}
+    q = {"settings.rfid_uid": uid}
 
-    # db_user = await db.filter(model=User, limit=1, **q)
+    db_user = await db.filter(model=User, limit=1, **q)
 
-    # if len(db_user) == 0:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
-    #     )
+    if len(db_user) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+        )
 
-    # requested_user: User = db_user[0]
+    requested_user: User = db_user[0]
 
-    # access_token = AuthJWT.create_access_token(sub=requested_user.id)
-    # refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
+    access_token = AuthJWT.create_access_token(sub=requested_user.id)
+    refresh_token = AuthJWT.create_refresh_token(sub=requested_user.id)
 
-    # return AuthResponse(
-    #     user=requested_user, access_token=access_token, refresh_token=refresh_token
-    # )
-
-    ...
+    return AuthResponse(
+        user=requested_user, access_token=access_token, refresh_token=refresh_token
+    )

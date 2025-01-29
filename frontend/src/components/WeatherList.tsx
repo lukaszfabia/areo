@@ -112,6 +112,9 @@ export const WeatherList = () => {
                     <TableColumn key="altitude" allowsSorting>
                         Altitude (m)
                     </TableColumn>
+                    <TableColumn key="created">
+                        Read at
+                    </TableColumn>
                 </TableHeader>
                 <TableBody
                     isLoading={isLoading}

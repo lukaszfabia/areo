@@ -96,15 +96,21 @@ async def delete(
 async def add_rfid(
     user: dict = Depends(AuthJWT.get_current_user),
     db: DB = Depends(get_database),
-    # raspberry: RaspberryPiService = Depends(get_raspberry),
+    raspberry: RaspberryPiService = Depends(get_raspberry),
 ):
-    # result = await raspberry.send_command(
-    #     topic="command/rfid",
-    #     message={"action": "start_rfid"},
-    #     timeout=30,
-    # )
+    try:
+        result = await raspberry.send_command(
+            topic="command/rfid",
+            message={"action": "start_rfid"},
+            timeout=30,
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to connect with raspberry pi ",
+        )
 
-    # uid = result["uid"]
+    uid = result["uid"]
 
     uid = "to jest testowe uid"
 

@@ -3,7 +3,7 @@ import datetime
 import logging
 from typing import List
 import uuid
-from fastapi import FastAPI, logger
+from fastapi import Depends, FastAPI, logger
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.general import router as general_router
 from app.routers.users import router as user_router
@@ -22,6 +22,8 @@ async def make_read(reader: str, app: FastAPI, job_id: str):
     logger.info(f"Executing job for {reader} with job_id: {job_id}")
     logger.info(f"Reading weather data for: {reader}")
     # call make read function from scheduler service
+
+    app.scheduler_service.make_read(reader)
 
     await schedule_next_job(reader, app, job_id)
 
@@ -64,7 +66,6 @@ async def refresh_schedules(app: FastAPI):
         for time, reader in schedules.items()
     }
 
-    # Remove outdated jobs
     for job in app.scheduler.get_jobs():
         if job.id == "refresh_schedules":
             continue
@@ -72,7 +73,6 @@ async def refresh_schedules(app: FastAPI):
             app.scheduler.remove_job(job.id)
             logger.info(f"Removed outdated job {job.id}")
 
-    # Add or update current jobs
     for time, reader in schedules.items():
         job_id = f"{reader}_{time.hour}_{time.minute}_{time.second}"
         try:
@@ -80,7 +80,7 @@ async def refresh_schedules(app: FastAPI):
                 hour=time.hour,
                 minute=time.minute,
                 second=time.second,
-                timezone="Europe/Warsaw",  # Set to your desired timezone
+                timezone="Europe/Warsaw",
             )
             logger.info(f"Adding/updating job {job_id}")
 

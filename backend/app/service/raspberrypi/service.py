@@ -1,8 +1,10 @@
 import asyncio
 import json
+from typing import Optional
 
 from paho.mqtt.client import Client as MQTTClient
 from app.main import logger
+from app.db.models.weather import Weather
 
 
 class RaspberryPiService:
@@ -30,6 +32,7 @@ class RaspberryPiService:
         """Send what u want to raspberry pi
 
         Usage:
+            wrap in try catch block
             response = await raspberry_service.send_command(
                                 topic="command/weather", # your topic alternative command/rfid
                                 message={"action": "get_weather"}, # action = start_rfid for starting listening on card
@@ -45,3 +48,25 @@ class RaspberryPiService:
             await asyncio.sleep(0.1)
 
         raise TimeoutError("No response from Raspberry Pi")
+
+    async def get_weather(self, reader: str) -> Optional[Weather]:
+        """Please provide emaila as a reader"""
+
+        try:
+            response = await self.send_command(
+                topic="command/weather",
+                message={"action": "get_weather"},
+                timeout=10,
+            )
+        except:
+            return None
+
+        weather = Weather(
+            temperature=response["temperature"],
+            altitude=response["altitude"],
+            pressure=response["pressure"],
+            humidity=response["humidity"],
+            reader=reader,
+        )
+
+        return weather

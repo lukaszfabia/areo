@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar
 from app.db.models.model import Model, Time
 
 T = TypeVar("T", bound=Model)
@@ -14,6 +14,8 @@ class DB(ABC):
 
         Args:
             model (T): type of the object
+            limit - amount of fetched items
+            skip - offset
 
         Returns:
             List[T]: result with objects
@@ -21,7 +23,13 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def filter(self, model: T, limit: Optional[int] = None, **kwargs) -> List[T]:
+    async def filter(
+        self,
+        model: T,
+        limit: Optional[int] = None,
+        skip: Optional[int] = None,
+        **kwargs
+    ) -> List[T]:
         """Selects basing on filter
 
         Args:
@@ -80,5 +88,17 @@ class DB(ABC):
 
         Returns:
             Optional[Dict[str, Any]]: result
+        """
+        pass
+
+    @abstractmethod
+    async def dummy_weather(self, limit: Optional[int] = 20) -> bool:
+        """Generate some weather data
+
+        Args:
+            limit (Optional[int], optional): how much rows do u want to insert. Defaults to 20.
+
+        Returns:
+            bool: status
         """
         pass
