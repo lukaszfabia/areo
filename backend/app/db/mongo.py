@@ -10,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
 from app.db.models.model import Time
-from models.weather import Weather
+from app.db.models.weather import Weather
 import random
 
 class MongoDB(DB):
