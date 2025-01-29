@@ -1,7 +1,8 @@
 import { Table, TableHeader, TableColumn, TableBody, Spinner, TableRow, TableCell, getKeyValue } from "@heroui/react";
 import React from "react";
 import { useAsyncList } from "@react-stately/data";
-import { Weather } from "@/lib/models";
+import { Weather, WeatherPaginated } from "@/lib/models";
+import { api } from "@/lib/api";
 
 
 const weatherData: Weather[] = [
@@ -52,9 +53,32 @@ export const WeatherList = () => {
 
     let list = useAsyncList<Weather, string>({
         async load({ }) {
+            setIsLoading(true)
+
+            let items: Weather[] = [];
+
+            try {
+                const res = await api<WeatherPaginated>({
+                    apiVersion: "/api/v1",
+                    endpoint: "/weather-history/",
+                })
+
+                console.log(res)
+
+                if (res.data) {
+                    console.log(res.data.data)
+
+                    const weather = res.data.data as Weather[]
+
+                    items = weather
+                }
+            } catch (error) {
+                console.log("Something went wrong")
+            }
+
+            setIsLoading(false)
             return {
-                // load weather data with api 
-                items: [...weatherData],
+                items: items,
             };
         },
         async sort({ items, sortDescriptor }) {

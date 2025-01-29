@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import status
 from fastapi import Depends
@@ -24,7 +24,7 @@ class PaginationInfo(BaseModel):
 
 
 class PaginatedWeather(BaseModel):
-    data: Weather
+    data: List[Weather]
     pagination: PaginationInfo
 
 

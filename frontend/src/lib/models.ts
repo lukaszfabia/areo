@@ -34,7 +34,19 @@ export interface Weather extends Base {
 }
 
 export interface Tokens {
-    user: User,
-    access_token: string,
-    refresh_token: string,
+    user: User
+    access_token: string
+    refresh_token: string
+}
+
+export interface WeatherPaginated {
+    data: Weather[]
+    pagination: PaginationInfo
+}
+
+interface PaginationInfo {
+    page: number
+    limit: number
+    total_items: number
+    total_pages: number
 }

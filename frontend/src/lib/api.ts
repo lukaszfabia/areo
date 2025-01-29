@@ -1,4 +1,4 @@
-import { Tokens, User, Weather } from "./models"
+import { Tokens, User, Weather, WeatherPaginated } from "./models"
 import getToken, { ACCESS } from "./token"
 
 type FailedRequest = {
@@ -6,7 +6,7 @@ type FailedRequest = {
 }
 
 // DTO
-type Model = User | Weather | Tokens
+type Model = User | Weather | Tokens | WeatherPaginated
 
 export interface Response<T extends Model> {
     data?: T | null
