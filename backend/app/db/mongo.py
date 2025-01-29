@@ -202,7 +202,7 @@ class MongoDB(DB):
 
         return result if result else None
 
-    async def dummy_weather(self, reader: str, limit: Optional[int] = 20) -> bool:
+    async def dummy_weather(self, model: T, reader: str, limit: Optional[int] = 20) -> bool:
         """Inserts dummy weather data
 
         Args:
@@ -212,8 +212,7 @@ class MongoDB(DB):
             bool: operation status
         """
 
-        collection_name = "weather_data"
-        collection: AsyncIOMotorCollection = self.db[collection_name]
+        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
 
         dummy_data = []
         for _ in range(limit):
