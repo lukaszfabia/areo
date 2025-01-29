@@ -8,15 +8,18 @@ from app.db.models.weather import Weather
 
 
 class RaspberryPiService:
+    broker = "10.108.33.xxx"
+    port = 1883
+
     # ./raspberry/sender.py
-    def __init__(self, broker: str = "10.0.0.1", port: int = 1883):
+    def __init__(self, broker: str = broker, port: int = port):
         self.client = MQTTClient()
         self.client.on_message = self.__on_message
         self.client.on_connect = self.__on_connect
         self.loop = asyncio.get_event_loop()
         self.response_data = None
 
-        self.client.connect(broker, port)
+        self.client.connect(broker, port, 60)
         self.client.loop_start()
 
     def __on_connect(self, client, userdata, flags, rc):
@@ -70,3 +73,26 @@ class RaspberryPiService:
         )
 
         return weather
+
+    async def read_rfid(self) -> Optional[str]:
+        try:
+            result = await self.send_command(
+                topic="command/rfid",
+                message={"action": "start_rfid"},
+                timeout=30,
+            )
+        except TimeoutError:
+            return None
+
+        uid = result["uid"]
+
+        try:
+            await self.send_command(
+                topic="command/rfid",
+                message={"action": "stop_rifd"},
+                timeout=10,
+            )
+        except TimeoutError:
+            logger.error("Failed to stop listening on rfid")
+
+        return uid

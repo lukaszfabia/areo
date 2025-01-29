@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+import threading
 import os
 import RPi.GPIO as GPIO
 import time
@@ -7,11 +6,12 @@ import datetime
 import paho.mqtt.client as mqtt
 import json
 from typing import Optional
-from card_handler import rfid_read
 from handlers import WeatherHandler
+from mfrc522 import MFRC522
 
 terminal_id = "T0"
-broker = "10.0.0.1"
+broker = "10.108.33.xxx"
+port = 1883
 
 client = mqtt.Client()
 
@@ -24,12 +24,14 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(buzzerPin, GPIO.OUT)
 GPIO.setup(buttonRed, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-
+rfid_reader = MFRC522()
 weather_handler = WeatherHandler()
+
+rfid_listening = False
 
 
 def connect_to_broker() -> None:
-    client.connect(broker)
+    client.connect(broker, port=port, keepalive=60)
     client.publish("status", "Raspberry Pi connected")
 
 
@@ -64,6 +66,38 @@ def stop() -> None:
     os._exit(0)
 
 
+def make_brr():
+    buzzer(True)
+    time.sleep(0.5)
+    buzzer(False)
+    time.sleep(0.5)
+
+
+def rfid_listener():
+    global rfid_listening, uid, num
+    while rfid_listening:
+        try:
+            (status, TagType) = rfid_reader.MFRC522_Request(rfid_reader.PICC_REQIDL)
+            if status == rfid_reader.MI_OK:
+                (status, raw_uid) = rfid_reader.MFRC522_Anticoll()
+                if status == rfid_reader.MI_OK:
+                    uid = "".join([str(x) for x in raw_uid])
+                    num = len(uid)
+                    print(f"RFID card detected: UID={uid}, NUM={num}")
+                    call_rfid_reading(str(uid), str(num))
+
+                    make_brr()
+
+                    # # stop listening
+                    # rfid_listening = False
+
+        except Exception as e:
+            client.publish("response/rfid", json.dumps({"error": str(e)}))
+            print(f"Error during RFID read: {e}")
+
+        time.sleep(1)
+
+
 def on_connect(client, userdata, flags, rc):
     print(f"Connected to MQTT broker with result code {rc}")
     client.subscribe("command/rfid")
@@ -71,26 +105,24 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    global uid, num
+    global rfid_listening
     topic = msg.topic
     payload = json.loads(msg.payload.decode())
     print(f"Received message on topic {topic}: {payload}")
 
-    if topic == "command/rfid" and payload.get("action") == "start_rfid":
-        print("Starting RFID listener...")
-        try:
-            uid, num = rfid_read()
-            call_rfid_reading(str(uid), str(num))
+    if topic == "command/rfid":
+        # card handler
+        if payload.get("action") == "start_rfid":
+            print("Starting RFID listener...")
+            if not rfid_listening:
+                rfid_listening = True
+                threading.Thread(target=rfid_listener, daemon=True).start()
 
-            buzzer(True)
-            time.sleep(0.5)
-            buzzer(False)
-            time.sleep(0.5)
+        elif payload.get("action") == "stop_rfid":
+            print("Stopping RFID listener...")
+            rfid_listening = False
 
-        except Exception as e:
-            client.publish("response/rfid", json.dumps({"error": str(e)}))
-            print(f"Error during RFID read: {e}")
-
+    # weahter handler
     elif topic == "command/weather" and payload.get("action") == "get_weather":
         print("Sending weather data...")
         send_weather_data()

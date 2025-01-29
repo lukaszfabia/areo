@@ -98,21 +98,12 @@ async def add_rfid(
     db: DB = Depends(get_database),
     raspberry: RaspberryPiService = Depends(get_raspberry),
 ):
-    try:
-        result = await raspberry.send_command(
-            topic="command/rfid",
-            message={"action": "start_rfid"},
-            timeout=30,
-        )
-    except:
+    uid = await raspberry.read_rfid()
+    if uid is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to connect with raspberry pi ",
+            detail="Failed to connect with raspberry pi",
         )
-
-    uid = result["uid"]
-
-    uid = "to jest testowe uid"
 
     # fields to update
     db_user: User = await me(user, db)

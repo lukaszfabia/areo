@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# export DISPLAY=:0.0
+export DISPLAY=:0.0
 
 sudo apt update
 sudo apt install mosquitto mosquitto-clients

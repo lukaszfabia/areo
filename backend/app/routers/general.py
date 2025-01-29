@@ -134,19 +134,12 @@ async def rfid_auth(
     raspberry: RaspberryPiService = Depends(get_raspberry),
 ):
 
-    try:
-        result = await raspberry.send_command(
-            topic="command/rfid",
-            message={"action": "start_rfid"},
-            timeout=30,
-        )
-    except:
+    uid = await raspberry.read_rfid()
+    if uid is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to connect with raspberry pi",
         )
-
-    uid = result["uid"]
 
     q = {"settings.rfid_uid": uid}
 
