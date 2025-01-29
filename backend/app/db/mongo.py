@@ -6,13 +6,12 @@ from motor.motor_asyncio import (
     AsyncIOMotorDatabase,
     AsyncIOMotorCollection,
 )
-from datetime import datetime, timezone
-
-
+from datetime import datetime, timezone, timedelta
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
 from app.db.models.model import Time
-
+from models.weather import Weather
+import random
 
 class MongoDB(DB):
     def __init__(self) -> None:
@@ -203,7 +202,7 @@ class MongoDB(DB):
 
         return result if result else None
 
-    async def dummy_weather(self, limit: Optional[int] = 20) -> bool:
+    async def dummy_weather(self, reader: str, limit: Optional[int] = 20) -> bool:
         """Inserts dummy weather data
 
         Args:
@@ -212,5 +211,20 @@ class MongoDB(DB):
         Returns:
             bool: operation status
         """
-        # TODO: implement filler
-        ...
+
+        collection_name = "weather_data"
+        collection: AsyncIOMotorCollection = self.db[collection_name]
+
+        dummy_data = []
+        for _ in range(limit):
+            weather_entry = Weather(
+                temperature=round(random.uniform(-10, 35), 1),
+                humidity=random.randint(20, 100),
+                pressure=round(random.uniform(950,1075), 1),
+                altitude=random.randint(-100, 1000),
+                reader=reader
+            )
+            dummy_data.append(weather_entry)
+        
+        res = await collection.insert_many(dummy_data)
+        return bool(res.inserted_ids)
