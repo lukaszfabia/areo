@@ -58,7 +58,7 @@ export const AuthForm: FC<{ login?: boolean }> = ({ login = false }) => {
                         {/* login */}
                         {login &&
                             <>
-                                <Link href="/sign-up" size="sm">Forgot password?</Link>
+                                <Link href="/rfid-auth" size="sm">Auth without passes?</Link>
                                 <Link href="/sign-up" size="sm">Don't have an account?</Link>
                             </>
                         }

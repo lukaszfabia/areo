@@ -35,6 +35,7 @@ type AuthCtxProps = {
     refresh: () => void;
     update: (body: Record<string, any>) => void;
     addRfid: () => void;
+    rfidAuth: () => void;
 }
 
 const AuthCtx = createContext<AuthCtxProps>({
@@ -46,6 +47,7 @@ const AuthCtx = createContext<AuthCtxProps>({
     update: async () => { },
     refresh: async () => { },
     addRfid: async () => { },
+    rfidAuth: async () => { },
 })
 
 
@@ -180,7 +182,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         }
     }), []);
 
+    const rfidAuth = async () => {
+        setIsLoading(true)
+        try {
+            const result = await api<Tokens>({
+                endpoint: "/rfid-auth",
+                apiVersion: "/api/v1"
+            })
 
+            if (result.data) {
+                setUser(result.data.user)
+
+            } else if (result.detail) {
+                console.log("error: ", result.detail)
+                setError(result.detail)
+            }
+
+        } catch (error) {
+
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <AuthCtx.Provider value={{
@@ -192,6 +215,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
             refresh,
             update,
             addRfid,
+            rfidAuth
         }}>
             {children}
         </AuthCtx.Provider>

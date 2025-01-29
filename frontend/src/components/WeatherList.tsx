@@ -1,52 +1,24 @@
 import { Table, TableHeader, TableColumn, TableBody, Spinner, TableRow, TableCell, getKeyValue } from "@heroui/react";
-import React from "react";
+import React, { Key } from "react";
 import { useAsyncList } from "@react-stately/data";
 import { Weather, WeatherPaginated } from "@/lib/models";
 import { api } from "@/lib/api";
 
 
-const weatherData: Weather[] = [
-    {
-        _id: "23adfv23",
-        created_at: new Date("2025-01-01T12:00:00Z"),
-        updated_at: new Date("2025-01-01T14:00:00Z"),
-        temperature: 22,
-        humidity: 60,
-        pressure: 1013,
-        altitude: 150,
-        reader: "Sensor A"
-    },
-    {
-        _id: "2323",
-        created_at: new Date("2025-01-02T12:00:00Z"),
-        updated_at: new Date("2025-01-02T14:00:00Z"),
-        temperature: 19,
-        humidity: 65,
-        pressure: 1010,
-        altitude: 200,
-        reader: "Sensor B"
-    },
-    {
-        _id: "2334er23",
-        created_at: new Date("2025-01-03T12:00:00Z"),
-        updated_at: new Date("2025-01-03T14:00:00Z"),
-        temperature: 25,
-        humidity: 55,
-        pressure: 1015,
-        altitude: 100,
-        reader: "Sensor C"
-    },
-    {
-        _id: "232dfg3",
-        created_at: new Date("2025-01-04T12:00:00Z"),
-        updated_at: new Date("2025-01-04T14:00:00Z"),
-        temperature: 20,
-        humidity: 70,
-        pressure: 1020,
-        altitude: 50,
-        reader: "Sensor D"
+const formatValue = (columnName: Key, value: string | number | Date) => {
+    if (columnName === "created_at") {
+        return new Date(value).toLocaleString("pl-PL", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } else if (typeof value === "number") {
+        return value.toFixed(2);
     }
-];
+    return value;
+};
 
 export const WeatherList = () => {
     const [isLoading, setIsLoading] = React.useState(false);
@@ -136,7 +108,7 @@ export const WeatherList = () => {
                     <TableColumn key="altitude" allowsSorting>
                         Altitude (m)
                     </TableColumn>
-                    <TableColumn key="created">
+                    <TableColumn key="created_at">
                         Read at
                     </TableColumn>
                 </TableHeader>
@@ -149,7 +121,7 @@ export const WeatherList = () => {
                         <TableRow key={item._id?.toString()} className="hover:bg-slate-800 transition-all duration-200 cursor-pointer">
                             {(columnKey) => (
                                 <TableCell className="px-6 py-4 text-gray-300">
-                                    {getKeyValue(item, columnKey)}
+                                    {`${formatValue(columnKey, getKeyValue(item, columnKey))}`}
                                 </TableCell>
                             )}
                         </TableRow>

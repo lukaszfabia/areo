@@ -1,9 +1,9 @@
 "use client";
 
 import Loading from "@/components/ui/Spinner";
-import { AuthProps, useAuth } from "@/providers/Auth";
+import { useAuth } from "@/providers/Auth";
 import Login from "../login/page";
-import { User, Weather } from "@/lib/models";
+import { User } from "@/lib/models";
 import { WeatherCard } from "@/components/WeatherCard"
 import { WeatherList } from "@/components/WeatherList";
 import { Button, Chip, cn, Form, Input, Spinner, Switch, TimeInput } from "@heroui/react";
@@ -14,16 +14,6 @@ import { EmailUpdate } from "@/components/ui/Email";
 import { PasswordUpdate } from "@/components/ui/Password";
 import { UsernameUpdate } from "@/components/ui/Username";
 import { Time, toTime } from "@internationalized/date";
-
-const current: Weather = {
-    created_at: new Date(),
-    updated_at: new Date(),
-    temperature: 22,
-    humidity: 23,
-    pressure: 1023,
-    altitude: 34,
-    reader: "reader"
-}
 
 
 export default function Profile() {
@@ -38,7 +28,7 @@ export default function Profile() {
                 <h1 className="lg:text-3xl md:text-2xl text-xl text-gray-500">Logged as <span className="mx-2 lg:text-5xl md:text-3xl text-2xl font-extrabold text-gray-50">{user.username ? user.username : user.email.split("@")}</span></h1>
             </div>
             <div className="flex gap-10">
-                <WeatherCard weather={current} />
+                <WeatherCard />
 
                 <WeatherList />
             </div>

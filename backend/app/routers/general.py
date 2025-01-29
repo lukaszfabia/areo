@@ -47,10 +47,8 @@ def get_raspberry() -> RaspberryPiService:
 
 @router.get("/", tags=["db filler"], status_code=status.HTTP_201_CREATED)
 async def api_root(db: DB = Depends(get_database)):
-    reader = "rychu@rychu.com"
-    model = Weather
-    limit = 20
-    if await db.dummy_weather(model=model, reader=reader, limit=limit):
+    reader = "testuser@gmail.com"
+    if await db.dummy_weather(model=Weather, reader=reader):
         return {
             "message": "Successfully filled!",
         }

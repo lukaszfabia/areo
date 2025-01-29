@@ -10,8 +10,9 @@ from datetime import datetime, timezone, timedelta
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
 from app.db.models.model import Time
-from models.weather import Weather
+from app.db.models.weather import Weather
 import random
+
 
 class MongoDB(DB):
     def __init__(self) -> None:
@@ -54,7 +55,9 @@ class MongoDB(DB):
         Returns:
             List[T]: List of T's
         """
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         documents = await collection.find({"deleted_at": None}).to_list(length=None)
 
@@ -63,8 +66,8 @@ class MongoDB(DB):
     async def filter(
         self,
         model: T,
+        skip: Optional[int] = 0,
         limit: Optional[int] = None,
-        skip: Optional[int] = None,
         **kwargs,
     ) -> List[T]:
         """Filter models based on query
@@ -77,14 +80,16 @@ class MongoDB(DB):
             List[T]: List of T's
         """
 
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         query = {k: v for k, v in kwargs.items()}
         query["deleted_at"] = None
         if v := query.get("_id"):
             query["_id"] = ObjectId(v)
 
-        documents = await collection.find(query).skip(skip).to_list(length=limit)
+        documents = await collection.find(query).skip(skip).to_list(length=limit or 0)
 
         return [model(**doc) for doc in documents]
 
@@ -97,7 +102,9 @@ class MongoDB(DB):
         Returns:
             Any: dict with new object
         """
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         dumped = model.dict(by_alias=True)
 
@@ -117,7 +124,9 @@ class MongoDB(DB):
         Returns:
             Any: is deleted successfullly
         """
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         # use filters to find doc
         query = {"deleted_at": None, "_id": ObjectId(id)}
@@ -152,7 +161,9 @@ class MongoDB(DB):
         Returns:
             Any: is deleted successfullly
         """
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         # use filters
         query = {k: v for k, v in kwargs.items()}
@@ -178,7 +189,9 @@ class MongoDB(DB):
     async def get_times(self, model: T, value: str) -> Optional[Dict[Time, str]]:
         """Get sorted times to read"""
 
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
         fields = {field: 1 for field in [value, "settings.times"]}
         fields["_id"] = 0  # remove id
@@ -202,7 +215,9 @@ class MongoDB(DB):
 
         return result if result else None
 
-    async def dummy_weather(self, model: T, reader: str, limit: Optional[int] = 20) -> bool:
+    async def dummy_weather(
+        self, model: T, reader: str, limit: Optional[int] = 20
+    ) -> bool:
         """Inserts dummy weather data
 
         Args:
@@ -212,18 +227,20 @@ class MongoDB(DB):
             bool: operation status
         """
 
-        collection: AsyncIOMotorCollection = self.db[model.__repr_name__]
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
 
-        dummy_data = []
-        for _ in range(limit):
-            weather_entry = Weather(
-                temperature=round(random.uniform(-10, 35), 1),
-                humidity=random.randint(20, 100),
-                pressure=round(random.uniform(950,1075), 1),
-                altitude=random.randint(-100, 1000),
-                reader=reader
-            )
-            dummy_data.append(weather_entry)
-        
+        dummy_data = [
+            Weather(
+                temperature=random.uniform(-10, 35),
+                humidity=random.uniform(20, 100),
+                pressure=random.uniform(950, 1075),
+                altitude=random.uniform(-100, 1000),
+                reader=reader,
+            ).dict(by_alias=True)
+            for _ in range(limit)
+        ]
+
         res = await collection.insert_many(dummy_data)
         return bool(res.inserted_ids)

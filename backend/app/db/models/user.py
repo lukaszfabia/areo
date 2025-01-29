@@ -37,7 +37,7 @@ class User(Model):
     password: str
     settings: Optional[Settings] = None
 
-    __repr_name__ = "users"
+    model_config = {"collection_name": "users"}
 
     def compare_password(self, password: str) -> bool:
         """Compares password with db

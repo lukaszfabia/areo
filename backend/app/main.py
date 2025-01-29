@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, logger
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.general import router as general_router
 from app.routers.users import router as user_router
+from app.routers.weathers import router as weather_router
 from app.db.mongo import MongoDB
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -146,6 +147,7 @@ def create_app() -> FastAPI:
 
     app.include_router(general_router, prefix="/api/v1")
     app.include_router(user_router, prefix="/api/v1")
+    app.include_router(weather_router, prefix="/api/v1")
     return app
 
 

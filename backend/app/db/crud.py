@@ -24,11 +24,7 @@ class DB(ABC):
 
     @abstractmethod
     async def filter(
-        self,
-        model: T,
-        limit: Optional[int] = None,
-        skip: Optional[int] = None,
-        **kwargs
+        self, model: T, limit: Optional[int] = None, skip: Optional[int] = 0, **kwargs
     ) -> List[T]:
         """Selects basing on filter
 
@@ -92,7 +88,9 @@ class DB(ABC):
         pass
 
     @abstractmethod
-    async def dummy_weather(self, model: T, reader: str, limit: Optional[int] = 20) -> bool:
+    async def dummy_weather(
+        self, model: T, reader: str, limit: Optional[int] = 20
+    ) -> bool:
         """Generate some weather data
 
         Args:

@@ -1,36 +1,88 @@
-import { Weather } from "@/lib/models"
+import { useEffect, useState } from "react";
+import { Weather } from "@/lib/models";
 import { transformTime } from "@/lib/time";
-import { faCloud, faMountain, faTachometerAlt, faTint } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faCloud, faMountain, faTachometerAlt, faTint } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "@heroui/react";
+import Loading from "./ui/Spinner";
+import { api } from "@/lib/api";
 
+export const WeatherCard = () => {
+    const [weather, setWeather] = useState<Weather | null>(null);
+    const [loading, setLoading] = useState(false);
 
-export const WeatherCard = ({ weather }: { weather: Weather }) => {
-    const { temperature, humidity, pressure, altitude, created_at, updated_at } = weather;
+    const fetchWeather = async () => {
+        setLoading(true);
+        try {
+            const r = await api<Weather>({
+                endpoint: "/weather/",
+                apiVersion: "/api/v1",
+            });
+
+            setWeather(r.data ?? null);
+        } catch (error) {
+            console.error("Failed to fetch current data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!weather) {
+            fetchWeather();
+        }
+    }, [weather]);
+
+    if (loading || !weather) {
+        return <Loading />;
+    }
 
     return (
-        <div className="bg-gray-900 p-10 rounded-3xl shadow-xl w-1/3 space-y-10">
-            <div className="flex text-center justify-between items-center mx-10">
-                <h1 className="font-extrabold text-gray-200 lg:text-8xl md:text-5xl text-3xl">{temperature} &deg; C</h1>
-                <FontAwesomeIcon icon={faCloud} className="lg:text-8xl md:text-5xl text-3xl my-4" />
+        <div className="bg-gray-900 p-6 md:p-10 rounded-3xl shadow-xl w-full max-w-md sm:max-w-lg lg:max-w-xl space-y-6 md:space-y-10">
+            <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left mx-auto">
+                <h1 className="font-extrabold text-gray-200 text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
+                    {weather.temperature} &deg;C
+                </h1>
+                <FontAwesomeIcon icon={faCloud} className="text-5xl sm:text-6xl md:text-7xl my-4 text-gray-200" />
             </div>
 
-            <div className="text-gray-300 my-2">
-                <div className="flex items-center justify-center md:text-lg">
-                    <FontAwesomeIcon icon={faTint} className="mr-2 md:text-3xl text-2xl text-gray-100" />
-                    <p className="text-gray-300"><span className="md:text-3xl text-2xl text-gray-100">{humidity}</span> % Humidity</p>
+            <div className="text-gray-300 space-y-4">
+                <div className="flex items-center justify-center sm:justify-start text-lg">
+                    <FontAwesomeIcon icon={faTint} className="mr-3 text-2xl sm:text-3xl text-gray-100" />
+                    <p>
+                        <span className="text-2xl sm:text-3xl text-gray-100">{weather.humidity}</span> % Humidity
+                    </p>
                 </div>
-                <div className="flex items-center justify-center md:text-lg">
-                    <FontAwesomeIcon icon={faTachometerAlt} className="mr-2 md:text-3xl text-2xl text-gray-100" />
-                    <p className="text-gray-300"><span className="md:text-3xl text-2xl text-gray-100">{pressure}</span> hPa. Pressure</p>
+                <div className="flex items-center justify-center sm:justify-start text-lg">
+                    <FontAwesomeIcon icon={faTachometerAlt} className="mr-3 text-2xl sm:text-3xl text-gray-100" />
+                    <p>
+                        <span className="text-2xl sm:text-3xl text-gray-100">{weather.pressure}</span> hPa Pressure
+                    </p>
                 </div>
-                <div className="flex items-center justify-center md:text-lg">
-                    <FontAwesomeIcon icon={faMountain} className="mr-2 md:text-3xl text-2xl text-gray-100" />
-                    <p className="text-gray-300"><span className="md:text-3xl text-2xl text-gray-100">{altitude}</span> m. Altitude</p>
+                <div className="flex items-center justify-center sm:justify-start text-lg">
+                    <FontAwesomeIcon icon={faMountain} className="mr-3 text-2xl sm:text-3xl text-gray-100" />
+                    <p>
+                        <span className="text-2xl sm:text-3xl text-gray-100">{weather.altitude}</span> m Altitude
+                    </p>
                 </div>
             </div>
 
-            <div className="text-gray-500 mt-4">
-                <p className="text-sm">Fetched at: <span className="text-gray-200">{transformTime(created_at)}</span></p>
+            <div className="text-gray-500 mt-4 text-center sm:text-left">
+                <p className="text-sm">
+                    Fetched at: <span className="text-gray-200">{transformTime(weather.created_at)}</span>
+                </p>
+            </div>
+
+            <div className="flex items-center justify-center">
+                <Button
+                    color="secondary"
+                    variant="shadow"
+                    className="rounded-3xl"
+                    onPress={fetchWeather}
+                    isLoading={loading}
+                >
+                    What's the current???
+                </Button>
             </div>
         </div>
     );

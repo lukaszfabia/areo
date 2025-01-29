@@ -3,7 +3,7 @@ from app.db.models.model import Time
 from app.db.crud import DB
 from app.db.models.user import User
 from app.service.raspberrypi.service import RaspberryPiService
-from backend.app.db.models.weather import Weather
+from app.db.models.weather import Weather
 
 
 class SchedulerService:

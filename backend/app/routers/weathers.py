@@ -10,7 +10,7 @@ from app.db.crud import DB
 from app.routers.general import get_database
 from app.routers.general import get_raspberry
 from app.service.raspberrypi.service import RaspberryPiService
-from backend.app.db.models.weather import Weather
+from app.db.models.weather import Weather
 from app.routers.users import me
 
 router = APIRouter(tags=["weather associated endpoints", "weather data"])
@@ -38,7 +38,7 @@ async def weather_historical_data(
     user: dict = Depends(AuthJWT.get_current_user),
     db: DB = Depends(get_database),
     page: int = Query(default=1, ge=1, description="Page number"),
-    limit: int = Query(default=10, ge=1, le=100, description="Items per page"),
+    limit: int = Query(default=5, ge=1, le=100, description="Items per page"),
 ):
 
     offset = (page - 1) * limit
@@ -55,6 +55,8 @@ async def weather_historical_data(
         )
 
     total_items = len(data)
+
+    print(total_items)
 
     return PaginatedWeather(
         data=data,
