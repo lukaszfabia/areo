@@ -310,7 +310,7 @@ class ExerciseHandler:
             si_unit,
         ):
             self.oled_handler = oled_handler
-            self.current_value = accessor()
+            self.current_value = accessor
             self.value_delta = value_delta
             self.accessor = accessor
             self.print_tuple = pixel_tuple
