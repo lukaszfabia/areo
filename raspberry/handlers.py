@@ -1,9 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont
 
-# dodac tests.config
 from tests.config import *
 import adafruit_bme280.advanced as adafruit_bme280
-import lib.oled.SSD1331 as SSD1331
+import tests.lib.oled.SSD1331 as SSD1331
 import RPi.GPIO as GPIO
 import w1thermsensor
 import neopixel
@@ -22,11 +21,12 @@ LOW_PRESSURE = 1000.0
 
 HIGH_HUMIDITY = 75.0  # in %
 LOW_HUMIDITY = 0.0  # in %
-buzzerPin = 18
+buzzerPin = 23
 
 
 class WeatherHandler:
     def __init__(self):
+        GPIO.setup(buzzerPin, GPIO.OUT)
         self.__LedController = LedController()
         self.__ExerciseHandler = ExerciseHandler()
         self.__ExerciseHandler.first_print_all()
@@ -34,15 +34,15 @@ class WeatherHandler:
     def __buzzer(self, state):
         GPIO.output(buzzerPin, not state)
 
-    def get_weather(self, reader: str):
+    def get_weather(self):
         """Get weather stats"""
 
         self.__buzzer(True)
 
-        temperature = self.__ExerciseHandler.SensorHandler.temperature
-        altitude = self.__ExerciseHandler.SensorHandler.altitude
-        pressure = self.__ExerciseHandler.SensorHandler.pressure
-        humidity = self.__ExerciseHandler.SensorHandler.humidity
+        temperature = self.__ExerciseHandler.sensorHandler.temperature
+        altitude = self.__ExerciseHandler.sensorHandler.altitude
+        pressure = self.__ExerciseHandler.sensorHandler.pressure
+        humidity = self.__ExerciseHandler.sensorHandler.humidity
 
         self.__buzzer(False)
 
@@ -52,6 +52,7 @@ class WeatherHandler:
             pressure=pressure,
             humidity=humidity,
         )
+
         self.__ExerciseHandler.print_all()
 
         return {
@@ -59,7 +60,6 @@ class WeatherHandler:
             "altitude": altitude,
             "pressure": pressure,
             "humidity": humidity,
-            "reader": reader,
         }
 
 
@@ -165,6 +165,10 @@ class LedController:
             self.__colors[6].color = Color.blue
             self.__colors[7].color = Color.blue
 
+    def turn_off_all_leds(self):
+        for color in self.__colors:
+            GPIO.output(color, GPIO.LOW)
+
 
 class SensorHandler:
     def __init__(self):
@@ -199,9 +203,7 @@ class SensorHandler:
 
 
 class Font:
-    ARIAL = ImageFont.truetype("fonts/arial.ttf")
-    TIMES = ImageFont.truetype("fonts/times.ttf")
-    MATORAN = ImageFont.truetype("fonts/Matoran.ttf")
+    ARIAL = ImageFont.truetype("./raspberry/tests/lib/oled/Font.ttf")
 
 
 class OledHandler:
@@ -254,7 +256,7 @@ class ExerciseHandler:
 
     def __init__(self):
         self.oled_handler = OledHandler(
-            OledHandler.GRAY, "app/service/raspberrytpi/images/background.png"
+            OledHandler.GRAY, "./raspberry/images/background.png"
         )
         self.sensorHandler = SensorHandler()
         self.all_handlers = [

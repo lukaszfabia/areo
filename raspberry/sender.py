@@ -10,14 +10,14 @@ from handlers import WeatherHandler
 from mfrc522 import MFRC522
 
 terminal_id = "T0"
-broker = "10.108.33.xxx"
+broker = "10.108.33.124"
 port = 1883
 
 client = mqtt.Client()
 
 uid: Optional[int] = None
 num: Optional[int] = None
-buzzerPin = 18
+buzzerPin = 23
 buttonRed = 17
 
 GPIO.setmode(GPIO.BCM)
@@ -66,13 +66,6 @@ def stop() -> None:
     os._exit(0)
 
 
-def make_brr():
-    buzzer(True)
-    time.sleep(0.5)
-    buzzer(False)
-    time.sleep(0.5)
-
-
 def rfid_listener():
     global rfid_listening, uid, num
     while rfid_listening:
@@ -86,11 +79,6 @@ def rfid_listener():
                     print(f"RFID card detected: UID={uid}, NUM={num}")
                     call_rfid_reading(str(uid), str(num))
 
-                    make_brr()
-
-                    # # stop listening
-                    # rfid_listening = False
-
         except Exception as e:
             client.publish("response/rfid", json.dumps({"error": str(e)}))
             print(f"Error during RFID read: {e}")
@@ -99,6 +87,7 @@ def rfid_listener():
 
 
 def on_connect(client, userdata, flags, rc):
+    # topics
     print(f"Connected to MQTT broker with result code {rc}")
     client.subscribe("command/rfid")
     client.subscribe("command/weather")
