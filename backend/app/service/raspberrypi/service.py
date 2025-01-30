@@ -8,27 +8,27 @@ from app.db.models.weather import Weather
 
 
 class RaspberryPiService:
-    broker = "10.108.33.xxx"
+    broker = "10.108.33.124"
     port = 1883
 
     # ./raspberry/sender.py
     def __init__(self, broker: str = broker, port: int = port):
         self.client = MQTTClient()
-        self.client.on_message = self.__on_message
-        self.client.on_connect = self.__on_connect
+        self.client.on_message = self._on_message
+        self.client.on_connect = self._on_connect
         self.loop = asyncio.get_event_loop()
         self.response_data = None
 
         self.client.connect(broker, port, 60)
         self.client.loop_start()
 
-    def __on_connect(self, client, userdata, flags, rc):
-        logger.info(f"Connected to MQTT broker with result code {rc}")
+    def _on_connect(self, client, userdata, flags, rc):
+        print(f"Connected to MQTT broker with result code {rc}")
         client.subscribe("response/weather")
         client.subscribe("response/rfid")
 
-    def __on_message(self, client, userdata, msg):
-        logger.info(f"Received message on topic {msg.topic}: {msg.payload.decode()}")
+    def _on_message(self, client, userdata, msg):
+        print(f"Received message on topic {msg.topic}: {msg.payload.decode()}")
         self.response_data = json.loads(msg.payload)
 
     async def send_command(self, topic: str, message: dict, timeout: int = 10):
@@ -45,12 +45,16 @@ class RaspberryPiService:
         self.response_data = None
         self.client.publish(topic, json.dumps(message))
 
-        for _ in range(timeout * 10):
-            if self.response_data is not None:
-                return self.response_data
-            await asyncio.sleep(0.1)
+        try:
+            await asyncio.wait_for(self._wait_for_response(), timeout=timeout)
+            return self.response_data
+        except asyncio.TimeoutError:
+            print(f"Timeout: No response from Raspberry Pi for topic {topic}")
+            return None
 
-        raise TimeoutError("No response from Raspberry Pi")
+    async def _wait_for_response(self):
+        while self.response_data is None:
+            await asyncio.sleep(0.1)
 
     async def get_weather(self, reader: str) -> Optional[Weather]:
         """Please provide emaila as a reader"""
@@ -59,7 +63,7 @@ class RaspberryPiService:
             response = await self.send_command(
                 topic="command/weather",
                 message={"action": "get_weather"},
-                timeout=10,
+                timeout=20,
             )
         except:
             return None
@@ -81,7 +85,11 @@ class RaspberryPiService:
                 message={"action": "start_rfid"},
                 timeout=30,
             )
+            if not result or "uid" not in result:
+                print("RFID read failed: Invalid response")
+                return None
         except TimeoutError:
+            print("RFID read timeout")
             return None
 
         uid = result["uid"]
@@ -90,9 +98,9 @@ class RaspberryPiService:
             await self.send_command(
                 topic="command/rfid",
                 message={"action": "stop_rfid"},
-                timeout=10,
+                timeout=30,
             )
         except TimeoutError:
-            logger.error("Failed to stop listening on rfid")
+            print("Failed to stop RFID reading")
 
         return uid

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from bson import ObjectId
 from decouple import config
 from motor.motor_asyncio import (
@@ -6,7 +6,9 @@ from motor.motor_asyncio import (
     AsyncIOMotorDatabase,
     AsyncIOMotorCollection,
 )
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+
+from pymongo import DESCENDING
 from app.db.crud import DB, T
 from app.utils.hash import hash_password
 from app.db.models.model import Time
@@ -89,7 +91,12 @@ class MongoDB(DB):
         if v := query.get("_id"):
             query["_id"] = ObjectId(v)
 
-        documents = await collection.find(query).skip(skip).to_list(length=limit or 0)
+        documents = (
+            await collection.find(query)
+            .sort("created_at", DESCENDING)
+            .skip(skip)
+            .to_list(length=limit or 0)
+        )
 
         return [model(**doc) for doc in documents]
 
@@ -244,3 +251,22 @@ class MongoDB(DB):
 
         res = await collection.insert_many(dummy_data)
         return bool(res.inserted_ids)
+
+    async def add_rfid(self, model, email, uid) -> Optional[T]:
+        collection: AsyncIOMotorCollection = self.db[
+            model.model_config["collection_name"]
+        ]
+
+        query = {"deleted_at": None, "email": email}
+
+        now = datetime.now(timezone.utc)
+
+        operation = {"$set": {"updated_at": now, "rfid_uid": uid}}
+
+        result = await collection.update_one(query, operation)
+
+        if result.modified_count > 0:
+            updated_document = await collection.find_one(query)
+            return model(**updated_document)
+
+        return None

@@ -100,3 +100,17 @@ class DB(ABC):
             bool: status
         """
         pass
+
+    @abstractmethod
+    async def add_rfid(self, model: T, email: str, uid: str) -> Optional[T]:
+        """Add rfid to the model
+
+        Args:
+            model (T): table
+            email (str): users email
+            uid (str): uid
+
+        Returns:
+            Optional[T]: Updated obj
+        """
+        pass

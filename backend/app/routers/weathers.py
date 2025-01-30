@@ -5,7 +5,7 @@ from fastapi import Depends
 from pydantic import BaseModel
 
 from app.jwt.jwt import AuthJWT
-from app.db.models.user import Settings, User
+from app.db.models.user import User
 from app.db.crud import DB
 from app.routers.general import get_database
 from app.routers.general import get_raspberry
@@ -99,9 +99,9 @@ async def current_weather(
     return res
 
 
-# @router.get(
-#     "/weather/notify/",
-#     tags=["notify user"],
-#     status_code=status.HTTP_200_OK,
-# )
-# async def notify(): ...
+@router.get(
+    "/weather/notify/",
+    tags=["notify user"],
+    status_code=status.HTTP_200_OK,
+)
+async def notify(): ...

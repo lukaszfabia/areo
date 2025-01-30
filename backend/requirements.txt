@@ -31,3 +31,6 @@ python-decouple
 
 # hashing 
 passlib[bcrypt]
+
+# raspberry
+# mfrc522

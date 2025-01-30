@@ -115,6 +115,4 @@ async def add_rfid(
 
     db_user.settings.rfid_uid = uid
 
-    return await db.update(
-        model=User, id=db_user.id, **db_user.dict(exclude_unset=True, exclude={"id"})
-    )
+    return await db.add_rfid(model=User, email=db_user.email, uid=uid)

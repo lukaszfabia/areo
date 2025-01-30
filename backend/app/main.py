@@ -2,8 +2,7 @@ from contextlib import asynccontextmanager
 import datetime
 import logging
 from typing import List
-import uuid
-from fastapi import Depends, FastAPI, logger
+from fastapi import FastAPI, logger
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.general import router as general_router
 from app.routers.users import router as user_router
